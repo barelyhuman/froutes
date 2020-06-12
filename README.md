@@ -16,6 +16,8 @@ I'm one of the many people who use [Next.js(Vercel)](https:github.com/vercel/nex
 
 That's all I want the route to do for now.
 
-### Contribute
+### Rules
 
-As every open source project, you are free to contribute and since I'll try to achieve this without actually looking at next.js's internal code or even use @zeit/micro. The project while move slowly.
+-   No copying from Next.js
+-   Don't use micro, setup and parse node http from scratch
+-   Avoid 3rd party npm modules as much as possible
