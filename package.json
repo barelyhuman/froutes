@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/barelyhuman/route/issues"
   },
-  "homepage": "https://github.com/barelyhuman/route#readme"
+  "homepage": "https://github.com/barelyhuman/route#readme",
+  "dependencies": {
+    "ora": "^4.0.4"
+  }
 }
