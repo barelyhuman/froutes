@@ -1,37 +1,41 @@
 {
-  "name": "route",
-  "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
-  "scripts": {
-    "dev": "cd example && nodemon ../app.js",
-    "dev:inspect": "cd example && nodemon --inspect-brk ../app.js",
-    "start": "cd example && node ../app.js"
-    "precommit":"lint-staged",
-    "format":"prettier --write ."
-  },
-  "lint-staged":{
-    "*.js":[
-      "npm run format",
-      "git add"
-    ]
-  }
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/barelyhuman/route.git"
-  },
-  "author": "Siddharth Gelera",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/barelyhuman/route/issues"
-  },
-  "homepage": "https://github.com/barelyhuman/route#readme",
-  "dependencies": {
-    "husky": "^4.2.5",
-    "lint-staged": "^10.2.10",
-    "ora": "^4.0.4"
-  },
-  "devDependencies": {
-    "prettier": "^2.0.5"
-  }
+    "name": "route",
+    "version": "1.0.0",
+    "description": "",
+    "main": "app.js",
+    "scripts": {
+        "dev": "cd example && nodemon ../app.js",
+        "dev:inspect": "cd example && nodemon --inspect-brk ../app.js",
+        "start": "cd example && node ../app.js",
+        "format": "prettier --write ."
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/barelyhuman/route.git"
+    },
+    "author": "Siddharth Gelera",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/barelyhuman/route/issues"
+    },
+    "homepage": "https://github.com/barelyhuman/route#readme",
+    "dependencies": {
+        "husky": ">=4",
+        "lint-staged": ">=10",
+        "ora": "^4.0.4"
+    },
+    "devDependencies": {
+        "prettier": "^2.0.5"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "lint-staged"
+        }
+    },
+    "lint-staged": {
+        "*.{js,css,md}": [
+            "prettier --write",
+            "git add"
+        ]
+    }
 }
