@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "dev": "cd example && nodemon ../app.js",
+    "dev:inspect": "cd example && nodemon --inspect-brk ../app.js",
     "start": "cd example && node ../app.js"
   },
   "repository": {
