@@ -8,7 +8,7 @@ I'm one of the many people who use [Next.js(Vercel)](https:github.com/vercel/nex
 
 ### Roadmap (as of now)
 
--   [ ] Start of simple with something that can handle static routes.
+-   [x] Start of simple with something that can handle static routes.
 -   [ ] Add Dynamic paths and parameter parsing.
 -   [ ] Add extensive middleware support
 -   [ ] Ability to compile each api file with all it's requirements
