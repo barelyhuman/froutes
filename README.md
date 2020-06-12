@@ -18,6 +18,6 @@ That's all I want the route to do for now.
 
 ### Rules
 
--   No copying from Next.js
+-   No copying of code from Next.js
 -   Don't use micro, setup and parse node http from scratch
 -   Avoid 3rd party npm modules as much as possible
