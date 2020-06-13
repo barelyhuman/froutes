@@ -20,12 +20,12 @@
     },
     "homepage": "https://github.com/barelyhuman/route#readme",
     "dependencies": {
-        "husky": ">=4",
-        "lint-staged": ">=10",
         "ora": "^4.0.4"
     },
     "devDependencies": {
-        "prettier": "^2.0.5"
+        "prettier": "^2.0.5",
+        "husky": ">=4",
+        "lint-staged": ">=10"
     },
     "husky": {
         "hooks": {
