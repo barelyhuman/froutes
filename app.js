@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const microServer = require('./lib/micro-server');
 const setupRoutes = require('./lib/setup-routes');
 const http = require('http');

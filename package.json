@@ -1,8 +1,11 @@
 {
-    "name": "route",
+    "name": "routex",
     "version": "1.0.0",
-    "description": "",
+    "description": "A minimal file tree based api router for node rest api's.",
     "main": "app.js",
+    "bin": {
+        "routex": "dist/index.js"
+    },
     "scripts": {
         "dev": "cd example && nodemon ../app.js",
         "dev:inspect": "cd example && nodemon --inspect-brk ../app.js",

@@ -1,4 +1,4 @@
-# Route
+# Routex
 
 A minimal file tree based api router for building rest api's with node.
 
@@ -13,7 +13,7 @@ I'm one of the many people who use [Next.js(Vercel)](https://github.com/vercel/n
 -   [ ] Add Dynamic paths and parameter parsing.
 -   [ ] Add minimal request and response helpers.
 
-That's all I want the route to do for now.
+That's all I want the `routex` to do for now.
 
 ### Warning
 
@@ -35,8 +35,8 @@ Example file tree:
 
 ```
 - api
-  - me.js // this compiles to a route <host>:<port>/api/me
-  - [id].js; // this compile to a route <host>:<port>/api/<dynamicParameterId>
+  - me.js // this compiles to <host>:<port>/api/me
+  - [id].js; // this compile to <host>:<port>/api/<dynamicParameterId>
 ```
 
 Example `me.js` that only handles `GET` requests:
