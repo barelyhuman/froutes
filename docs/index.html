@@ -1,161 +1,76 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link
-            rel="stylesheet"
-            href="https://unpkg.com/sakura.css/css/sakura.css"
-            type="text/css"
-        />
-        <title>Route | API's made easy</title>
-    </head>
 
-    <body>
-        <h1>
-            <a id="route" class="anchor" aria-hidden="true" href="#route"></a
-            >Route
-        </h1>
-        <p>
-            A minimal file tree based api router for building rest api's with
-            node.
-        </p>
-        <h3>
-            <a
-                id="motivation"
-                class="anchor"
-                aria-hidden="true"
-                href="#motivation"
-            ></a
-            >Motivation
-        </h3>
-        <p>
-            I'm one of the many people who use
-            <a href="https://github.com/vercel/next.js">Next.js(Vercel)</a>
-            and while the whole framework is great, I really like the API routes
-            mechanism and thought I'd implement my own to avoid having to bundle
-            the whole monolith. Thus, reducing the size of the overall
-            application. And also to learn how this stuff works. (I'm curious
-            like that).
-        </p>
-        <h3>
-            <a
-                id="roadmap-as-of-now"
-                class="anchor"
-                aria-hidden="true"
-                href="#roadmap-as-of-now"
-            ></a
-            >Roadmap (as of now)
-        </h3>
-        <ul>
-            <li class="task-list-item">
-                <input type="checkbox" disabled="" checked="" />Start of simple
-                with something that can handle static routes.
-            </li>
-            <li class="task-list-item">
-                <input type="checkbox" disabled="" />Add CLI tool to be used
-                with it
-            </li>
-            <li class="task-list-item">
-                <input type="checkbox" disabled="" />Add Dynamic paths and
-                parameter parsing.
-            </li>
-            <li class="task-list-item">
-                <input type="checkbox" disabled="" />Add minimal request and
-                response helpers.
-            </li>
-        </ul>
-        <p>That's all I want the route to do for now.</p>
-        <h3>
-            <a
-                id="warning"
-                class="anchor"
-                aria-hidden="true"
-                href="#warning"
-            ></a
-            >Warning
-        </h3>
-        <p>
-            This library is still in active development and is bound to have
-            bugs , kindly make sure you use it only for testing and not for
-            production as of now.
-        </p>
-        <h3>
-            <a
-                id="current-limitations"
-                class="anchor"
-                aria-hidden="true"
-                href="#current-limitations"
-            ></a
-            >Current Limitations
-        </h3>
-        <ul>
-            <li><p>No cli to run this (WIP)</p></li>
-            <li>
-                <p>
-                    Only dynamic files are supported, not dynamic folders so you
-                    can't possible create a folder structure for a route like
-                    <code>/api/user/:id/posts</code>. But you can create routes
-                    like <code>/api/user/:id</code> and
-                    <code>/api/user/posts/:id</code>. (Ahead on the roadmap)
-                </p>
-            </li>
-            <li>
-                <p>
-                    Since the lib uses the native node HTTP right now, you are
-                    limited to it's request and response functions.
-                </p>
-            </li>
-        </ul>
-        <h3>
-            <a id="usage" class="anchor" aria-hidden="true" href="#usage"></a
-            >Usage
-        </h3>
-        <p>
-            Any file inside the folder <code>api</code> is mapped to
-            <code>/api/*</code> and will be treated as an API endpoint and all
-            HTTP requests will be passed to this file. GET, POST, PUT, DELETE
-        </p>
-        <p>Example file tree:</p>
-        <pre><code class="language-js"> - api
-                    - me.js // this compiles to a route &lt;host&gt;:&lt;port&gt;/api/me
-                    - [id].js // this compile to a route &lt;host&gt;:&lt;port&gt;/api/&lt;dynamicParameterId&gt;
-                </code></pre>
-        <p>
-            Example <code>me.js</code> that only handles
-            <code>GET</code> requests:
-        </p>
-        <pre><code>module.exports = (req, res) =&gt; {
-                  if(req.method === 'GET'){
-                    res.writeHead(200, { 'Content-Type': 'text/plain' });
-                    res.write('Hello World!');
-                    res.end();
-                    return;
-                  }
-                
-                  res.statusCode = 404;
-                  res.end();
-                  return;
-                };
-                
-                
-                </code></pre>
-        <p>Example <code>[id].js</code> that handles the dynamic path param:</p>
-        <p><code>GET|POST|DELETE /api/1</code></p>
-        <pre><code>module.exports = (req, res) =&gt; {
-                    res.write('path param ' + JSON.stringify(req.params)) // {"id":1};
-                    res.end();
-                };
-                
-                </code></pre>
-        <h3>
-            <a id="rules" class="anchor" aria-hidden="true" href="#rules"></a
-            >Rules
-        </h3>
-        <ul>
-            <li>No copying of code from Next.js</li>
-            <li>Don't use micro, setup and parse node http from scratch</li>
-            <li>Avoid 3rd party npm modules as much as possible</li>
-        </ul>
-    </body>
-</html>
+        <!DOCTYPE html>
+        <html lang="en">
+            <head>
+                <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <link
+                    rel="stylesheet"
+                    href="https://unpkg.com/sakura.css/css/sakura.css"
+                    type="text/css"
+                />
+                <title>Route | API's made easy</title>
+            </head>
+        
+            <body>
+              <h1 id="route">Route</h1>
+<p>A minimal file tree based api router for building rest api&#39;s with node.</p>
+<h3 id="motivation">Motivation</h3>
+<p>I&#39;m one of the many people who use <a href="https://github.com/vercel/next.js">Next.js(Vercel)</a> and while the whole framework is great, I&#39;m a huge fan of the API routes mechanism and thought I&#39;d implement my own to avoid having to bundle the whole monolith. Thus, reducing the size of the overall application. And also to learn how this stuff works. (I&#39;m curious like that).</p>
+<h3 id="roadmap-as-of-now">Roadmap (as of now)</h3>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> Start of simple with something that can handle static routes.</li>
+<li><input disabled="" type="checkbox"> Add CLI tool to be used with it</li>
+<li><input disabled="" type="checkbox"> Add Dynamic paths and parameter parsing.</li>
+<li><input disabled="" type="checkbox"> Add minimal request and response helpers.</li>
+</ul>
+<p>That&#39;s all I want the route to do for now.</p>
+<h3 id="warning">Warning</h3>
+<p>This library is still in active development and is bound to have bugs , kindly make sure you use it only for testing and not for production as of now.</p>
+<h3 id="current-limitations">Current Limitations</h3>
+<ul>
+<li><p>No cli to run this (WIP)</p>
+</li>
+<li><p>Only dynamic files are supported, not dynamic folders so you can&#39;t possible create a folder structure for a route like <code>/api/user/:id/posts</code>. But you can create routes like <code>/api/user/:id</code> and <code>/api/user/posts/:id</code>. (Ahead on the roadmap)</p>
+</li>
+<li><p>Since the lib uses the native node HTTP right now, you are limited to it&#39;s request and response functions.</p>
+</li>
+</ul>
+<h3 id="usage">Usage</h3>
+<p>Any file inside the folder <code>api</code> is mapped to <code>/api/*</code> and will be treated as an API endpoint and all HTTP requests will be passed to this file. GET, POST, PUT, DELETE</p>
+<p>Example file tree:</p>
+<pre><code class="language-js">-api -
+me.js - // this compiles to a route &lt;host&gt;:&lt;port&gt;/api/me
+    [id].js; // this compile to a route &lt;host&gt;:&lt;port&gt;/api/&lt;dynamicParameterId&gt;</code></pre>
+<p>Example <code>me.js</code> that only handles <code>GET</code> requests:</p>
+<pre><code>module.exports = (req, res) =&gt; {
+  if(req.method === &#39;GET&#39;){
+    res.writeHead(200, { &#39;Content-Type&#39;: &#39;text/plain&#39; });
+    res.write(&#39;Hello World!&#39;);
+    res.end();
+    return;
+  }
+
+  res.statusCode = 404;
+  res.end();
+  return;
+};
+
+</code></pre>
+<p>Example <code>[id].js</code> that handles the dynamic path param:</p>
+<p><code>GET|POST|DELETE /api/1</code></p>
+<pre><code>module.exports = (req, res) =&gt; {
+    res.write(&#39;path param &#39; + JSON.stringify(req.params)) // {&quot;id&quot;:1};
+    res.end();
+};
+</code></pre>
+<h3 id="rules">Rules</h3>
+<ul>
+<li>No copying of code from Next.js</li>
+<li>Don&#39;t use micro, setup and parse node http from scratch</li>
+<li>Avoid 3rd party npm modules as much as possible</li>
+</ul>
+
+            </body>
+        </html>    
+        

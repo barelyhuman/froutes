@@ -7,7 +7,8 @@
         "dev": "cd example && nodemon ../app.js",
         "dev:inspect": "cd example && nodemon --inspect-brk ../app.js",
         "start": "cd example && node ../app.js",
-        "format": "prettier --write ."
+        "format": "prettier --write .",
+        "create:doc": "node create-docs.js"
     },
     "repository": {
         "type": "git",
@@ -23,13 +24,17 @@
         "ora": "^4.0.4"
     },
     "devDependencies": {
-        "prettier": "^2.0.5",
         "husky": ">=4",
-        "lint-staged": ">=10"
+        "lint-staged": ">=10",
+        "marked": "^1.1.0",
+        "prettier": "^2.0.5"
     },
     "husky": {
         "hooks": {
-            "pre-commit": "lint-staged"
+            "pre-commit": [
+                "lint-staged",
+                "npm run create:doc"
+            ]
         }
     },
     "lint-staged": {
