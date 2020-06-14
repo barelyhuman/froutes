@@ -78,6 +78,15 @@
             <code>/api/*</code> and will be treated as an API endpoint and all
             HTTP requests will be passed to this file. GET, POST, PUT, DELETE
         </p>
+        <pre><code class="language-sh"># for global install
+npm i -g barelyhuman/routex
+#or for local install
+npm i barelyhuman/routex</code></pre>
+        <p>
+            Then go ahead and create directories and files under the
+            <code>api</code> folder as mentioned or check the
+            <code>examples</code> folder for reference.
+        </p>
         <p>Example file tree:</p>
         <pre><code>- api
   - me.js // this compiles to &lt;host&gt;:&lt;port&gt;/api/me
@@ -106,6 +115,12 @@
     res.write(&#39;path param &#39; + JSON.stringify(req.params)) // {&quot;id&quot;:1};
     res.end();
 };
+</code></pre>
+        <p>
+            Then run routex on the root folder of the project, this folder
+            should contain the <code>api</code> folder
+        </p>
+        <pre><code class="language-sh">  routex
 </code></pre>
         <h3 id="rules">Rules</h3>
         <ul>

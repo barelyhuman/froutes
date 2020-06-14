@@ -31,6 +31,15 @@ This library is still in active development and is bound to have bugs , kindly m
 
 Any file inside the folder `api` is mapped to `/api/*` and will be treated as an API endpoint and all HTTP requests will be passed to this file. GET, POST, PUT, DELETE
 
+```sh
+# for global install
+npm i -g barelyhuman/routex
+#or for local install
+npm i barelyhuman/routex
+```
+
+Then go ahead and create directories and files under the `api` folder as mentioned or check the `examples` folder for reference.
+
 Example file tree:
 
 ```
@@ -67,6 +76,13 @@ module.exports = (req, res) => {
     res.write('path param ' + JSON.stringify(req.params)) // {"id":1};
     res.end();
 };
+
+```
+
+Then run routex on the root folder of the project, this folder should contain the `api` folder
+
+```sh
+  routex
 
 ```
 

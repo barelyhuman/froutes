@@ -12,6 +12,7 @@
         "start": "cd example && node ../app.js",
         "format": "prettier --write .",
         "create:doc": "node create-docs.js && git add docs/index.html",
+        "postinstall": "build",
         "build": "ncc build app.js -o dist"
     },
     "repository": {
