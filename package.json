@@ -32,8 +32,7 @@
     "husky": {
         "hooks": {
             "pre-commit": [
-                "lint-staged",
-                "npm run create:doc"
+                "npm run create:doc && lint-staged"
             ]
         }
     },
