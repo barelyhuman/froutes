@@ -4,7 +4,7 @@ A minimal file tree based api router for building rest api's with node.
 
 ### Motivation
 
-I'm one of the many people who use [Next.js(Vercel)](https:github.com/vercel/next.js) and while the whole framework is great, I'm a huge fan of the API routes mechanism and thought I'd implement my own to avoid having to bundle the whole monolith. Thus, reducing the size of the overall application. And also to learn how this stuff works. (I'm curious like that).
+I'm one of the many people who use [Next.js(Vercel)](https://github.com/vercel/next.js) and while the whole framework is great, I'm a huge fan of the API routes mechanism and thought I'd implement my own to avoid having to bundle the whole monolith. Thus, reducing the size of the overall application. And also to learn how this stuff works. (I'm curious like that).
 
 ### Roadmap (as of now)
 
