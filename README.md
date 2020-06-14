@@ -1,6 +1,6 @@
 # Route
 
-A simple file tree based api router for node rest api's.
+A minimal file tree based api router for node rest api's.
 
 ### Motivation
 
