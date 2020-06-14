@@ -33,10 +33,10 @@ Any file inside the folder `api` is mapped to `/api/*` and will be treated as an
 
 Example file tree:
 
-```js
--api -
-me.js - // this compiles to a route <host>:<port>/api/me
-    [id].js; // this compile to a route <host>:<port>/api/<dynamicParameterId>
+```
+- api
+  - me.js // this compiles to a route <host>:<port>/api/me
+  - [id].js; // this compile to a route <host>:<port>/api/<dynamicParameterId>
 ```
 
 Example `me.js` that only handles `GET` requests:
