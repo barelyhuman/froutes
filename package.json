@@ -8,7 +8,8 @@
         "dev:inspect": "cd example && nodemon --inspect-brk ../app.js",
         "start": "cd example && node ../app.js",
         "format": "prettier --write .",
-        "create:doc": "node create-docs.js && git add docs/index.html"
+        "create:doc": "node create-docs.js && git add docs/index.html",
+        "build": "ncc build app.js -o dist"
     },
     "repository": {
         "type": "git",
@@ -24,6 +25,7 @@
         "ora": "^4.0.4"
     },
     "devDependencies": {
+        "@zeit/ncc": "^0.22.3",
         "husky": ">=4",
         "lint-staged": ">=10",
         "marked": "^1.1.0",
