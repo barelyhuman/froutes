@@ -12,6 +12,7 @@ I'm one of the many people who use [Next.js(Vercel)](https://github.com/vercel/n
 -   [x] Add CLI tool to be used with it (Master and Canary)
 -   [x] Add Dynamic paths and parameter parsing. (Canary Only)
 -   [ ] Add minimal request and response helpers.
+-   [ ] Add more features to CLI (reloading, watchers, etc, etc)
 
 That's all I want the `routex` to do for now.
 
@@ -21,7 +22,7 @@ This library is still in active development and is bound to have bugs , kindly m
 
 ### Current Limitations
 
--   No cli to run this (WIP)
+-   A very limited cli, no hot reload, no file watcher, it literally just runs a simple processor for reading the file system as of now.
 
 -   Only dynamic files are supported, not dynamic folders so you can't possible create a folder structure for a route like `/api/user/:id/posts`. But you can create routes like `/api/user/:id` and `/api/user/posts/:id`. (Ahead on the roadmap)
 
@@ -30,6 +31,15 @@ This library is still in active development and is bound to have bugs , kindly m
 ### Usage
 
 Any file inside the folder `api` is mapped to `/api/*` and will be treated as an API endpoint and all HTTP requests will be passed to this file. GET, POST, PUT, DELETE
+
+```sh
+# for global install to avoid installing the devDependencies
+npm i -g barelyhuman/routex --only=prod
+# for local install to avoid installing the devDependencies
+npm i barelyhuman/routex --only=prod
+```
+
+Then go ahead and create directories and files under the `api` folder as mentioned or check the `examples` folder for reference.
 
 Example file tree:
 
@@ -67,6 +77,16 @@ module.exports = (req, res) => {
     res.write('path param ' + JSON.stringify(req.params)) // {"id":1};
     res.end();
 };
+
+```
+
+Then run routex on the root folder of the project, this folder should contain the `api` folder
+
+```sh
+# If installed globally
+routex
+# If installed locally
+npx routex
 
 ```
 

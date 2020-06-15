@@ -8,7 +8,7 @@
             href="https://unpkg.com/sakura.css/css/sakura.css"
             type="text/css"
         />
-        <title>Route | API's made easy</title>
+        <title>Routex | API's made easy</title>
     </head>
 
     <body>
@@ -45,6 +45,10 @@
                 <input disabled="" type="checkbox" /> Add minimal request and
                 response helpers.
             </li>
+            <li>
+                <input disabled="" type="checkbox" /> Add more features to CLI
+                (reloading, watchers, etc, etc)
+            </li>
         </ul>
         <p>That&#39;s all I want the <code>routex</code> to do for now.</p>
         <h3 id="warning">Warning</h3>
@@ -55,7 +59,13 @@
         </p>
         <h3 id="current-limitations">Current Limitations</h3>
         <ul>
-            <li><p>No cli to run this (WIP)</p></li>
+            <li>
+                <p>
+                    A very limited cli, no hot reload, no file watcher, it
+                    literally just runs a simple processor for reading the file
+                    system as of now.
+                </p>
+            </li>
             <li>
                 <p>
                     Only dynamic files are supported, not dynamic folders so you
@@ -77,6 +87,15 @@
             Any file inside the folder <code>api</code> is mapped to
             <code>/api/*</code> and will be treated as an API endpoint and all
             HTTP requests will be passed to this file. GET, POST, PUT, DELETE
+        </p>
+        <pre><code class="language-sh"># for global install to avoid installing the devDependencies
+npm i -g barelyhuman/routex --only=prod
+# for local install to avoid installing the devDependencies
+npm i barelyhuman/routex --only=prod</code></pre>
+        <p>
+            Then go ahead and create directories and files under the
+            <code>api</code> folder as mentioned or check the
+            <code>examples</code> folder for reference.
         </p>
         <p>Example file tree:</p>
         <pre><code>- api
@@ -106,6 +125,15 @@
     res.write(&#39;path param &#39; + JSON.stringify(req.params)) // {&quot;id&quot;:1};
     res.end();
 };
+</code></pre>
+        <p>
+            Then run routex on the root folder of the project, this folder
+            should contain the <code>api</code> folder
+        </p>
+        <pre><code class="language-sh"># If installed globally
+routex
+# If installed locally
+npx routex
 </code></pre>
         <h3 id="rules">Rules</h3>
         <ul>
