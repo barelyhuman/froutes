@@ -8,9 +8,9 @@ I'm one of the many people who use [Next.js(Vercel)](https://github.com/vercel/n
 
 ### Roadmap (as of now)
 
--   [x] Start of simple with something that can handle static routes.
--   [ ] Add CLI tool to be used with it
--   [ ] Add Dynamic paths and parameter parsing.
+-   [x] Start of simple with something that can handle static routes.(Master and Canary)
+-   [x] Add CLI tool to be used with it (Master and Canary)
+-   [x] Add Dynamic paths and parameter parsing. (Canary Only)
 -   [ ] Add minimal request and response helpers.
 
 That's all I want the `routex` to do for now.
