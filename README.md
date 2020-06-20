@@ -92,4 +92,4 @@ npx routex
 
 -   No copying of code from Next.js
 -   Don't use micro, setup and parse node http from scratch
--   Avoid 3rd party npm modules as much as possible
+-   Try to keep it 0 Deps.
