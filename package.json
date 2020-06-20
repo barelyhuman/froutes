@@ -14,7 +14,7 @@
         "create:doc": "node create-docs.js && git add docs/index.html",
         "build": "ncc build app.js -o dist && git add .",
         "test:endpoints": "sleep 5 && wait-on http://localhost:3000/api && node tests/endpoints.js",
-        "test": "run-p dev test:*"
+        "run:tests": "run-p dev test:*"
     },
     "repository": {
         "type": "git",
@@ -32,7 +32,6 @@
     "devDependencies": {
         "@zeit/ncc": "^0.22.3",
         "axios": "^0.19.2",
-        "concurrently": "^5.2.0",
         "husky": ">=4",
         "lint-staged": ">=10",
         "marked": "^1.1.0",
