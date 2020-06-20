@@ -42,6 +42,14 @@ const failingCases = [
         path: 'api/1',
         method: 'post',
     },
+    {
+        path: 'api/hello/idexist',
+        method: 'get',
+    },
+    {
+        path: 'api/hello/idexist',
+        method: 'post',
+    },
 ];
 
 const instance = axios.create({
