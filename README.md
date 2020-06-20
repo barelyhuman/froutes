@@ -24,8 +24,6 @@ This library is still in active development and is bound to have bugs , kindly m
 
 -   A very limited cli, no hot reload, no file watcher, it literally just runs a simple processor for reading the file system as of now.
 
--   Only dynamic files are supported, not dynamic folders so you can't possible create a folder structure for a route like `/api/user/:id/posts`. But you can create routes like `/api/user/:id` and `/api/user/posts/:id`. (Ahead on the roadmap)
-
 -   Since the lib uses the native node HTTP right now, you are limited to it's request and response functions.
 
 ### Usage
