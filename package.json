@@ -12,7 +12,7 @@
         "start": "cd example && node ../app.js",
         "format": "prettier --write .",
         "create:doc": "node create-docs.js && git add docs/index.html",
-        "build": "ncc build app.js -o dist",
+        "build": "ncc build app.js -o dist && git add .",
         "test:endpoints": "sleep 5 && wait-on http://localhost:3000/api && node tests/endpoints.js",
         "test": "run-p dev test:*"
     },
@@ -42,7 +42,7 @@
     "husky": {
         "hooks": {
             "pre-commit": [
-                "npm run create:doc && npm run build && lint-staged"
+                "npm run create:doc && lint-staged"
             ]
         }
     },
