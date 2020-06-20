@@ -1,4 +1,10 @@
 module.exports = (req, res) => {
-    res.write('Dynamic folder route');
+    if (req.method === 'GET') {
+        res.write('Dynamic folder route');
+        res.end();
+        return;
+    }
+    res.statusCode = 404;
     res.end();
+    return;
 };
