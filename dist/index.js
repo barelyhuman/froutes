@@ -63,7 +63,7 @@ module.exports = async (availableRoutes, req, res) => {
         let handlerPath = '';
         let currentPointer = availableRoutes;
 
-        parsedRouteUrl.forEach((item) => {
+        parsedRouteUrl.paths.forEach((item) => {
             let matchingKey;
             if (!currentPointer[item]) {
                 matchingKey = Object.keys(currentPointer).find(
@@ -117,6 +117,8 @@ module.exports = async (availableRoutes, req, res) => {
         }
 
         let _handlerPath = path.join(basePath(), handlerPath);
+
+        req.query = parsedRouteUrl.query;
 
         const handler = require(_handlerPath);
 
@@ -305,6 +307,13 @@ function processFile(file, pointer) {
 
 /***/ }),
 
+/***/ 191:
+/***/ (function(module) {
+
+module.exports = require("querystring");
+
+/***/ }),
+
 /***/ 239:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -348,11 +357,22 @@ module.exports = async (directory) => {
 /***/ }),
 
 /***/ 304:
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const querystring = __webpack_require__(191);
 
 module.exports = (url) => {
     const tokens = url.split('/').filter((item) => item);
-    return tokens;
+    const query = tokens[tokens.length - 1].split('?');
+    let queryParams = {};
+    if (query[1]) {
+        queryParams = querystring.parse(query[1]);
+    }
+    const paths = tokens.slice(0, tokens.length - 1).concat(query[0]);
+    return {
+        paths,
+        query: queryParams,
+    };
 };
 
 
