@@ -56,12 +56,18 @@ module.exports =
 const basePath = __webpack_require__(973);
 const path = __webpack_require__(622);
 const parseUrl = __webpack_require__(304);
+const { send, status } = __webpack_require__(876);
 
 module.exports = async (availableRoutes, req, res) => {
     try {
         const parsedRouteUrl = parseUrl(req.url);
         let handlerPath = '';
         let currentPointer = availableRoutes;
+
+        // Attach Helpers
+        res.send = send(res);
+        res.status = status(res);
+        //
 
         parsedRouteUrl.forEach((item) => {
             let matchingKey;
@@ -358,6 +364,29 @@ module.exports = (url) => {
 
 /***/ }),
 
+/***/ 427:
+/***/ (function(module) {
+
+module.exports = (res, type) => {
+    let _type = type;
+
+    const cases = {
+        json: 'application/json',
+        buffer: 'application/octet-stream',
+        text: 'text/html',
+    };
+
+    if (!cases[type]) {
+        _type = cases.text;
+    }
+
+    res.setHeader('Content-Type', _type);
+    return;
+};
+
+
+/***/ }),
+
 /***/ 544:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -414,6 +443,48 @@ const nextLine = (nextText) => {
 /***/ (function(module) {
 
 module.exports = require("fs");
+
+/***/ }),
+
+/***/ 876:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+const setContentType = __webpack_require__(427);
+
+exports.status = (res) => {
+    return (code) => {
+        if (typeof code !== 'number') {
+            throw new Error('Status Code should be a number');
+        }
+        return (res.statusCode = code);
+    };
+};
+
+exports.send = (res) => {
+    return (body) => {
+        let _body = body;
+        if (Buffer.isBuffer(body)) {
+            setContentType(res, 'buffer');
+        } else if (typeof body === 'string') {
+            setContentType(res, 'text');
+        } else if (
+            typeof body === 'object' ||
+            typeof body === 'boolean' ||
+            typeof body === 'number'
+        ) {
+            if (_body === null) {
+                _body = '';
+            }
+            _body = JSON.stringify(_body);
+            setContentType(res, 'json');
+        }
+
+        res.write(_body);
+        res.end();
+        return;
+    };
+};
+
 
 /***/ }),
 
