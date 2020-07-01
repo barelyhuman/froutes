@@ -1208,16 +1208,16 @@ exports.toggle = (force, writableStream) => {
 /***/ 304:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
+const url = __webpack_require__(835);
 const querystring = __webpack_require__(191);
 
-module.exports = (url) => {
-    const tokens = url.split('/').filter((item) => item);
-    const query = tokens[tokens.length - 1].split('?');
+module.exports = (urlstring) => {
+    const _url = url.parse(urlstring);
+    const paths = _url.pathname.split('/').filter((item) => item);
     let queryParams = {};
-    if (query[1]) {
-        queryParams = querystring.parse(query[1]);
+    if (_url.search && _url.search.length > 0) {
+        queryParams = querystring.parse(_url.search.replace('?', ''));
     }
-    const paths = tokens.slice(0, tokens.length - 1).concat(query[0]);
     return {
         paths,
         query: queryParams,
@@ -4545,6 +4545,13 @@ function bisearch(ucs) {
   return false
 }
 
+
+/***/ }),
+
+/***/ 835:
+/***/ (function(module) {
+
+module.exports = require("url");
 
 /***/ }),
 

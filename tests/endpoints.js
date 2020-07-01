@@ -35,6 +35,10 @@ const passingCases = [
         path: 'api/user/delete/1',
         method: 'get',
     },
+    {
+        path: 'api/me?query=somequerystring',
+        method: 'get',
+    },
 ];
 
 const failingCases = [
