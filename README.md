@@ -21,16 +21,30 @@ This library is still in active development and is bound to have bugs , kindly m
 
 -   A very limited cli, no hot reload, no file watcher, it literally just runs a simple processor for reading the file system as of now.
 
-### Usage
+### Installation
 
-Any folder that routex is run in will be considered the API root.
+#### Stable Cli
 
 ```sh
 # for global install to avoid installing the devDependencies
 npm i -g barelyhuman/routex --only=prod
 # for local install to avoid installing the devDependencies
 npm i barelyhuman/routex --only=prod
+
 ```
+
+#### Canary Cli
+
+```sh
+# for global install to avoid installing the devDependencies
+npm i -g barelyhuman/routex#canary --only=prod
+# for local install to avoid installing the devDependencies
+npm i barelyhuman/routex#canary --only=prod
+```
+
+### Usage
+
+Any folder that routex is run in will be considered the API root.
 
 Then go ahead and create directories and files under any folder as mentioned or check the `examples` folder for reference.
 
