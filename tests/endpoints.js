@@ -39,6 +39,14 @@ const passingCases = [
         path: 'api/me?query=somequerystring',
         method: 'get',
     },
+    {
+        path: '/',
+        method: 'get',
+    },
+    {
+        path: '/outer-route',
+        method: 'get',
+    },
 ];
 
 const failingCases = [

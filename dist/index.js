@@ -63,13 +63,13 @@ const { send, status } = __webpack_require__(876);
 module.exports = async (availableRoutes, req, res) => {
     try {
         const parsedRouteUrl = parseUrl(req.url);
+
         let handlerPath = '';
-        let currentPointer = availableRoutes;
+        let currentPointer = availableRoutes['.'];
 
         // Attach Helpers
         res.send = send(res);
         res.status = status(res);
-        //
 
         parsedRouteUrl.paths.forEach((item) => {
             let matchingKey;
@@ -400,21 +400,26 @@ module.exports = async () => {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const basePath = __webpack_require__(973);
-const fs = __webpack_require__(747);
+const fs = __webpack_require__(747).promises;
 const path = __webpack_require__(622);
 const checkApiDir = __webpack_require__(66);
 const processDirectories = __webpack_require__(239);
 
 module.exports = () => {
-    fs.readdir(basePath(), function (err, dirs) {
-        if (err) throw err;
-        const apiDirExists = checkApiDir(dirs);
-        if (!apiDirExists.valid) {
-            throw new Error('cannot find an `api` directory');
-        }
-        const processingPath = path.join(basePath());
-        return processDirectories(processingPath);
-    });
+    return fs
+        .readdir(basePath())
+        .then((dirs) => {
+            // const apiDirExists = checkApiDir(dirs);
+            // if (!apiDirExists.valid) {
+            //     throw new Error('cannot find an `api` directory');
+            // }
+            const processingPath = path.join(basePath());
+            return processDirectories(processingPath);
+        })
+        .catch((err) => {
+            console.error(err);
+            throw err;
+        });
 };
 
 
@@ -600,11 +605,8 @@ const path = __webpack_require__(622);
 module.exports = async (directory) => {
     try {
         const routeTree = {};
-
         let currentPointer = routeTree;
-
-        await processDirectory(directory, 'api', currentPointer);
-
+        await processDirectory(directory, '.', currentPointer);
         return routeTree;
     } catch (err) {
         console.error(err);
@@ -719,26 +721,11 @@ const createAvailableRoutes = __webpack_require__(168);
 const ora = __webpack_require__(937);
 
 module.exports = async (directory) => {
-    const spinner = ora('Compiling...').start();
     try {
+        const spinner = ora('Compiling...').start();
         const availableRoutesTree = await createAvailableRoutes(directory);
-
-        const routePath = await createRouteDir();
-
-        await new Promise((resolve, reject) => {
-            fs.writeFile(
-                path.join(routePath, 'routes.json'),
-                JSON.stringify(availableRoutesTree),
-                (err, done) => {
-                    if (err) reject(err);
-                    resolve(done);
-                }
-            );
-        });
-
-        setTimeout(() => {
-            spinner.succeed('Compiled');
-        }, 1000);
+        spinner.succeed('Compiled');
+        return availableRoutesTree;
     } catch (err) {
         spinner.color = 'red';
         spinner.text = 'Failed';
@@ -2645,12 +2632,9 @@ function processEmit (ev, arg) {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const router = __webpack_require__(22);
-const getAvailableRoutes = __webpack_require__(917);
 
-module.exports = async (req, res) => {
+module.exports = async (req, res, availableRoutes) => {
     try {
-        const availableRoutes = await getAvailableRoutes();
-
         return router(availableRoutes, req, res);
     } catch (err) {
         console.error(err);
@@ -5042,32 +5026,6 @@ Object.defineProperty(module, 'exports', {
 
 /***/ }),
 
-/***/ 917:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const fs = __webpack_require__(747);
-const createRouteDir = __webpack_require__(104);
-const path = __webpack_require__(622);
-
-module.exports = async () => {
-    try {
-        const routeDir = await createRouteDir();
-
-        return new Promise((resolve, reject) => {
-            fs.readFile(path.join(routeDir, 'routes.json'), (err, data) => {
-                if (err) reject(err);
-                resolve(JSON.parse(Buffer.from(data).toString()));
-            });
-        });
-    } catch (err) {
-        console.error(err);
-        throw err;
-    }
-};
-
-
-/***/ }),
-
 /***/ 927:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -5820,13 +5778,21 @@ const setupRoutes = __webpack_require__(116);
 const http = __webpack_require__(605);
 const PORT = process.env.PORT || 3000;
 
-setupRoutes();
-
-http.createServer((req, res) => {
-    microServer(req, res);
-}).listen(PORT, () => {
-    console.log('> Listening on ' + PORT);
-});
+setupRoutes()
+    .then((availableRoutes) => {
+        console.log({
+            availableRoutes: JSON.stringify(availableRoutes),
+        });
+        http.createServer((req, res) => {
+            microServer(req, res, availableRoutes);
+        }).listen(PORT, () => {
+            console.log('> Listening on ' + PORT);
+        });
+    })
+    .catch((err) => {
+        console.log(err);
+        throw err;
+    });
 
 
 /***/ }),
