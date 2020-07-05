@@ -5780,9 +5780,6 @@ const PORT = process.env.PORT || 3000;
 
 setupRoutes()
     .then((availableRoutes) => {
-        console.log({
-            availableRoutes: JSON.stringify(availableRoutes),
-        });
         http.createServer((req, res) => {
             microServer(req, res, availableRoutes);
         }).listen(PORT, () => {
