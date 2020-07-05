@@ -1,3 +1,3 @@
 module.exports = (req, res) => {
-    return res.end('user');
-};
+    return res.end('user')
+}

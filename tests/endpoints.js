@@ -1,6 +1,6 @@
-const axios = require('axios');
+const axios = require('axios')
 
-const baseURL = 'http://localhost:3000';
+const baseURL = 'http://localhost:3000'
 
 const passingCases = [
     {
@@ -47,7 +47,7 @@ const passingCases = [
         path: '/outer-route',
         method: 'get',
     },
-];
+]
 
 const failingCases = [
     {
@@ -62,49 +62,49 @@ const failingCases = [
         path: 'api/hello/idexist',
         method: 'post',
     },
-];
+]
 
 const instance = axios.create({
     baseURL,
-});
+})
 
 function runCases(cases, shouldFail) {
-    let successful = [];
-    let failed = [];
+    let successful = []
+    let failed = []
 
     const promises = cases.map((item) => {
         return instance[item.method](item.path)
             .then(() => {
                 if (shouldFail) {
-                    failed.push(item);
+                    failed.push(item)
                 } else {
-                    successful.push(item);
+                    successful.push(item)
                 }
             })
             .catch((err) => {
                 if (shouldFail) {
-                    successful.push(item);
+                    successful.push(item)
                 } else {
-                    failed.push(item);
+                    failed.push(item)
                 }
-            });
-    });
+            })
+    })
 
     return Promise.all(promises).then(() => {
-        console.log('=================================================');
-        console.log('Successful' + JSON.stringify(successful, null, 2));
-        console.log('=================================================');
-        console.log('Failed' + JSON.stringify(failed, null, 2));
-        console.log('=================================================');
-    });
+        console.log('=================================================')
+        console.log('Successful' + JSON.stringify(successful, null, 2))
+        console.log('=================================================')
+        console.log('Failed' + JSON.stringify(failed, null, 2))
+        console.log('=================================================')
+    })
 }
 
-console.log('=================================================');
-console.log('Running Passing Cases');
+console.log('=================================================')
+console.log('Running Passing Cases')
 runCases(passingCases, false).then(() => {
-    console.log('=================================================');
-    console.log('Running Failing Cases');
+    console.log('=================================================')
+    console.log('Running Failing Cases')
     runCases(failingCases, true).then(() => {
-        process.exit(0);
-    });
-});
+        process.exit(0)
+    })
+})

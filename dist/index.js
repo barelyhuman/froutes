@@ -55,89 +55,89 @@ module.exports =
 /***/ 22:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const basePath = __webpack_require__(973);
-const path = __webpack_require__(622);
-const parseUrl = __webpack_require__(304);
-const { send, status } = __webpack_require__(876);
+const basePath = __webpack_require__(973)
+const path = __webpack_require__(622)
+const parseUrl = __webpack_require__(304)
+const { send, status } = __webpack_require__(876)
 
 module.exports = async (availableRoutes, req, res) => {
     try {
-        const parsedRouteUrl = parseUrl(req.url);
+        const parsedRouteUrl = parseUrl(req.url)
 
-        let handlerPath = '';
-        let currentPointer = availableRoutes['.'];
+        let handlerPath = ''
+        let currentPointer = availableRoutes['.']
 
         // Attach Helpers
-        res.send = send(res);
-        res.status = status(res);
+        res.send = send(res)
+        res.status = status(res)
 
         parsedRouteUrl.paths.forEach((item) => {
-            let matchingKey;
+            let matchingKey
             if (!currentPointer[item]) {
                 matchingKey = Object.keys(currentPointer).find(
                     (key) =>
                         currentPointer[key].params &&
                         currentPointer[key].params.length > 0
-                );
+                )
 
                 if (matchingKey) {
-                    currentPointer = currentPointer[matchingKey];
-                    const key = matchingKey.replace(/[\[\]]/g, '');
+                    currentPointer = currentPointer[matchingKey]
+                    const key = matchingKey.replace(/[\[\]]/g, '')
                     req.params = {
                         ...req.params,
                         [key]: item,
-                    };
+                    }
                 } else {
-                    currentPointer = null;
-                    return;
+                    currentPointer = null
+                    return
                 }
             } else {
-                currentPointer = currentPointer[item];
+                currentPointer = currentPointer[item]
             }
 
             if (currentPointer) {
                 if (currentPointer.type === 'file') {
-                    handlerPath += currentPointer.index;
+                    handlerPath += currentPointer.index
                 } else {
                     if (matchingKey) {
-                        handlerPath += matchingKey + '/';
+                        handlerPath += matchingKey + '/'
                     } else {
-                        handlerPath += item + '/';
+                        handlerPath += item + '/'
                     }
                 }
             }
-        });
+        })
 
         if (!currentPointer || !currentPointer.type) {
-            res.statusCode = 404;
-            res.end();
-            return;
+            res.statusCode = 404
+            res.end()
+            return
         }
 
         if (currentPointer.type === 'dir') {
             if (currentPointer.index) {
-                handlerPath += currentPointer.index;
+                handlerPath += currentPointer.index
             } else {
-                res.statusCode = 404;
-                res.end();
-                return;
+                res.statusCode = 404
+                res.end()
+                return
             }
         }
 
-        let _handlerPath = path.join(basePath(), handlerPath);
+        let _handlerPath = path.join(basePath(), handlerPath)
 
-        req.query = parsedRouteUrl.query;
+        req.query = parsedRouteUrl.query
 
-        const handler = require(_handlerPath);
+        const handler = require(_handlerPath)
 
-        return handler(req, res);
+        return handler(req, res)
     } catch (err) {
-        console.error(err);
-        res.statusCode(500);
-        res.end();
-        throw err;
+        console.error(err)
+        res.statusCode(500)
+        res.end()
+        throw err
     }
-};
+}
 
 
 /***/ }),
@@ -153,10 +153,10 @@ module.exports = require("readline");
 /***/ (function(module) {
 
 module.exports = (dirs) => {
-    const exists = dirs.find((item) => item === 'api');
-    const valid = exists ? true : false;
-    return { valid, path: exists };
-};
+    const exists = dirs.find((item) => item === 'api')
+    const valid = exists ? true : false
+    return { valid, path: exists }
+}
 
 
 /***/ }),
@@ -356,42 +356,42 @@ if ( true && module.exports) {
 /***/ 104:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const basePath = __webpack_require__(973);
-const fs = __webpack_require__(747);
-const path = __webpack_require__(622);
+const basePath = __webpack_require__(973)
+const fs = __webpack_require__(747)
+const path = __webpack_require__(622)
 
 module.exports = async () => {
     try {
-        const creationPath = path.join(basePath(), '.route');
+        const creationPath = path.join(basePath(), '.route')
         const exists = await new Promise((resolve, reject) => {
             fs.stat(creationPath, (err, stat) => {
                 if (
                     (err && err.code === 'ENOENT') ||
                     (err && err.code === 'ENOTDIR')
                 ) {
-                    resolve(false);
+                    resolve(false)
                 }
-                return resolve(true);
-            });
-        });
+                return resolve(true)
+            })
+        })
 
         if (exists) {
-            return creationPath;
+            return creationPath
         } else {
             await new Promise((resolve, reject) => {
                 fs.mkdir(creationPath, (err, done) => {
-                    if (err) reject(err);
-                    resolve(done);
-                });
-            });
+                    if (err) reject(err)
+                    resolve(done)
+                })
+            })
         }
 
-        return creationPath;
+        return creationPath
     } catch (err) {
-        console.error(err);
-        throw err;
+        console.error(err)
+        throw err
     }
-};
+}
 
 
 /***/ }),
@@ -399,11 +399,11 @@ module.exports = async () => {
 /***/ 116:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const basePath = __webpack_require__(973);
-const fs = __webpack_require__(747).promises;
-const path = __webpack_require__(622);
-const checkApiDir = __webpack_require__(66);
-const processDirectories = __webpack_require__(239);
+const basePath = __webpack_require__(973)
+const fs = __webpack_require__(747).promises
+const path = __webpack_require__(622)
+const checkApiDir = __webpack_require__(66)
+const processDirectories = __webpack_require__(239)
 
 module.exports = () => {
     return fs
@@ -413,14 +413,14 @@ module.exports = () => {
             // if (!apiDirExists.valid) {
             //     throw new Error('cannot find an `api` directory');
             // }
-            const processingPath = path.join(basePath());
-            return processDirectories(processingPath);
+            const processingPath = path.join(basePath())
+            return processDirectories(processingPath)
         })
         .catch((err) => {
-            console.error(err);
-            throw err;
-        });
-};
+            console.error(err)
+            throw err
+        })
+}
 
 
 /***/ }),
@@ -599,88 +599,84 @@ module.exports = function (str) {
 /***/ 168:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const fs = __webpack_require__(747).promises;
-const path = __webpack_require__(622);
+const fs = __webpack_require__(747).promises
+const path = __webpack_require__(622)
 
 module.exports = async (directory) => {
     try {
-        const routeTree = {};
-        let currentPointer = routeTree;
-        await processDirectory(directory, '.', currentPointer);
-        return routeTree;
+        const routeTree = {}
+        let currentPointer = routeTree
+        await processDirectory(directory, '.', currentPointer)
+        return routeTree
     } catch (err) {
-        console.error(err);
-        throw err;
+        console.error(err)
+        throw err
     }
-};
+}
 
 async function processDirectory(currPath, dir, pointer) {
     try {
-        const pathToCheck = path.join(currPath, dir);
-        const pathStat = await fs.stat(pathToCheck);
+        const pathToCheck = path.join(currPath, dir)
+        const pathStat = await fs.stat(pathToCheck)
         if (pathStat.isDirectory()) {
-            const dirContent = await fs.readdir(pathToCheck);
+            const dirContent = await fs.readdir(pathToCheck)
             const treeMods = dirContent.map(async (fileRecord) => {
-                const nextPathToCheck = path.join(pathToCheck, fileRecord);
-                const nextFile = await fs.stat(nextPathToCheck);
+                const nextPathToCheck = path.join(pathToCheck, fileRecord)
+                const nextFile = await fs.stat(nextPathToCheck)
                 const nextPointer =
                     pointer[dir] ||
                     (pointer[dir] = {
                         type: 'dir',
-                    });
-                const paramRegex = /^\[(\w+)\]$/;
+                    })
+                const paramRegex = /^\[(\w+)\]$/
                 if (paramRegex.test(dir)) {
-                    debugger;
-                    const matchingParams = dir.match(paramRegex);
-                    const param = matchingParams[1];
-                    pointer[dir].params = [param];
-                    debugger;
+                    debugger
+                    const matchingParams = dir.match(paramRegex)
+                    const param = matchingParams[1]
+                    pointer[dir].params = [param]
+                    debugger
                 }
 
                 if (nextFile.isDirectory()) {
-                    await processDirectory(
-                        pathToCheck,
-                        fileRecord,
-                        nextPointer
-                    );
+                    await processDirectory(pathToCheck, fileRecord, nextPointer)
                 } else if (nextFile.isFile()) {
-                    processFile(fileRecord, nextPointer);
+                    processFile(fileRecord, nextPointer)
                 }
-                return Promise.resolve();
-            });
+                return Promise.resolve()
+            })
 
-            await Promise.all(treeMods);
+            await Promise.all(treeMods)
         } else if (pathStat.isFile()) {
-            processFile(dir, pointer);
+            processFile(dir, pointer)
         }
     } catch (err) {
-        console.error(err);
-        throw err;
+        console.error(err)
+        throw err
     }
 }
 
 function processFile(file, pointer) {
-    const paramRegex = /^\[(\w+)\].js$/;
+    const paramRegex = /^\[(\w+)\].js$/
     if (paramRegex.test(file)) {
-        const matchingParams = file.match(paramRegex);
-        const param = matchingParams[1];
-        const noExt = file.replace('.js', '');
+        const matchingParams = file.match(paramRegex)
+        const param = matchingParams[1]
+        const noExt = file.replace('.js', '')
         const valuesInsertion = {
             type: 'file',
             params: [param],
             index: file,
-        };
-        pointer[noExt] = valuesInsertion;
+        }
+        pointer[noExt] = valuesInsertion
     } else if (file === 'index.js') {
-        pointer.type = 'dir';
-        pointer.index = 'index.js';
+        pointer.type = 'dir'
+        pointer.index = 'index.js'
     } else {
-        const noExt = file.replace('.js', '');
+        const noExt = file.replace('.js', '')
         const valuesInsertion = {
             type: 'file',
             index: file,
-        };
-        pointer[noExt] = valuesInsertion;
+        }
+        pointer[noExt] = valuesInsertion
     }
 }
 
@@ -714,26 +710,26 @@ module.exports = require("querystring");
 /***/ 239:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const fs = __webpack_require__(747);
-const path = __webpack_require__(622);
-const createRouteDir = __webpack_require__(104);
-const createAvailableRoutes = __webpack_require__(168);
-const ora = __webpack_require__(937);
+const fs = __webpack_require__(747)
+const path = __webpack_require__(622)
+const createRouteDir = __webpack_require__(104)
+const createAvailableRoutes = __webpack_require__(168)
+const ora = __webpack_require__(937)
 
 module.exports = async (directory) => {
     try {
-        const spinner = ora('Compiling...').start();
-        const availableRoutesTree = await createAvailableRoutes(directory);
-        spinner.succeed('Compiled');
-        return availableRoutesTree;
+        const spinner = ora('Compiling...').start()
+        const availableRoutesTree = await createAvailableRoutes(directory)
+        spinner.succeed('Compiled')
+        return availableRoutesTree
     } catch (err) {
-        spinner.color = 'red';
-        spinner.text = 'Failed';
-        spinner.fail();
-        console.error(err);
-        throw err;
+        spinner.color = 'red'
+        spinner.text = 'Failed'
+        spinner.fail()
+        console.error(err)
+        throw err
     }
-};
+}
 
 
 /***/ }),
@@ -1195,21 +1191,21 @@ exports.toggle = (force, writableStream) => {
 /***/ 304:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const url = __webpack_require__(835);
-const querystring = __webpack_require__(191);
+const url = __webpack_require__(835)
+const querystring = __webpack_require__(191)
 
 module.exports = (urlstring) => {
-    const _url = url.parse(urlstring);
-    const paths = _url.pathname.split('/').filter((item) => item);
-    let queryParams = {};
+    const _url = url.parse(urlstring)
+    const paths = _url.pathname.split('/').filter((item) => item)
+    let queryParams = {}
     if (_url.search && _url.search.length > 0) {
-        queryParams = querystring.parse(_url.search.replace('?', ''));
+        queryParams = querystring.parse(_url.search.replace('?', ''))
     }
     return {
         paths,
         query: queryParams,
-    };
-};
+    }
+}
 
 
 /***/ }),
@@ -2374,21 +2370,21 @@ module.exports = require("stream");
 /***/ (function(module) {
 
 module.exports = (res, type) => {
-    let _type = type;
+    let _type = type
 
     const cases = {
         json: 'application/json',
         buffer: 'application/octet-stream',
         text: 'text/html',
-    };
-
-    if (!cases[type]) {
-        _type = cases.text;
     }
 
-    res.setHeader('Content-Type', _type);
-    return;
-};
+    if (!cases[type]) {
+        _type = cases.text
+    }
+
+    res.setHeader('Content-Type', _type)
+    return
+}
 
 
 /***/ }),
@@ -2631,16 +2627,16 @@ function processEmit (ev, arg) {
 /***/ 544:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const router = __webpack_require__(22);
+const router = __webpack_require__(22)
 
 module.exports = async (req, res, availableRoutes) => {
     try {
-        return router(availableRoutes, req, res);
+        return router(availableRoutes, req, res)
     } catch (err) {
-        console.error(err);
-        throw err;
+        console.error(err)
+        throw err
     }
-};
+}
 
 
 /***/ }),
@@ -4549,41 +4545,41 @@ module.exports = require("tty");
 /***/ 876:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-const setContentType = __webpack_require__(427);
+const setContentType = __webpack_require__(427)
 
 exports.status = (res) => {
     return (code) => {
         if (typeof code !== 'number') {
-            throw new Error('Status Code should be a number');
+            throw new Error('Status Code should be a number')
         }
-        return (res.statusCode = code);
-    };
-};
+        return (res.statusCode = code)
+    }
+}
 
 exports.send = (res) => {
     return (body) => {
-        let _body = body;
+        let _body = body
         if (Buffer.isBuffer(body)) {
-            setContentType(res, 'buffer');
+            setContentType(res, 'buffer')
         } else if (typeof body === 'string') {
-            setContentType(res, 'text');
+            setContentType(res, 'text')
         } else if (
             typeof body === 'object' ||
             typeof body === 'boolean' ||
             typeof body === 'number'
         ) {
             if (_body === null) {
-                _body = '';
+                _body = ''
             }
-            _body = JSON.stringify(_body);
-            setContentType(res, 'json');
+            _body = JSON.stringify(_body)
+            setContentType(res, 'json')
         }
 
-        res.write(_body);
-        res.end();
-        return;
-    };
-};
+        res.write(_body)
+        res.end()
+        return
+    }
+}
 
 
 /***/ }),
@@ -5773,23 +5769,23 @@ module.exports.promise = (action, options) => {
 /***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
 
-const microServer = __webpack_require__(544);
-const setupRoutes = __webpack_require__(116);
-const http = __webpack_require__(605);
-const PORT = process.env.PORT || 3000;
+const microServer = __webpack_require__(544)
+const setupRoutes = __webpack_require__(116)
+const http = __webpack_require__(605)
+const PORT = process.env.PORT || 3000
 
 setupRoutes()
     .then((availableRoutes) => {
         http.createServer((req, res) => {
-            microServer(req, res, availableRoutes);
+            microServer(req, res, availableRoutes)
         }).listen(PORT, () => {
-            console.log('> Listening on ' + PORT);
-        });
+            console.log('> Listening on ' + PORT)
+        })
     })
     .catch((err) => {
-        console.log(err);
-        throw err;
-    });
+        console.log(err)
+        throw err
+    })
 
 
 /***/ }),
@@ -5798,9 +5794,9 @@ setupRoutes()
 /***/ (function(module) {
 
 module.exports = () => {
-    const currPath = `${process.cwd()}`;
-    return currPath;
-};
+    const currPath = `${process.cwd()}`
+    return currPath
+}
 
 
 /***/ })

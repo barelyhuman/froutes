@@ -1,10 +1,10 @@
-const fs = require('fs').promises;
-const marked = require('marked');
+const fs = require('fs').promises
+const marked = require('marked')
 
 async function main() {
     try {
-        const fileMarkdownString = await fs.readFile('README.md');
-        const htmlString = marked(fileMarkdownString.toString());
+        const fileMarkdownString = await fs.readFile('README.md')
+        const htmlString = marked(fileMarkdownString.toString())
         const template = `
         <!DOCTYPE html>
         <html lang="en">
@@ -23,13 +23,13 @@ async function main() {
               ${htmlString}
             </body>
         </html>    
-        `;
+        `
 
-        await fs.writeFile('docs/index.html', template);
+        await fs.writeFile('docs/index.html', template)
     } catch (err) {
-        console.error(err);
-        throw err;
+        console.error(err)
+        throw err
     }
 }
 
-main();
+main()
