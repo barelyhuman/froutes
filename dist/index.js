@@ -55,89 +55,87 @@ module.exports =
 /***/ 22:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const basePath = __webpack_require__(973);
-const path = __webpack_require__(622);
-const parseUrl = __webpack_require__(304);
-const { send, status } = __webpack_require__(876);
+const basePath = __webpack_require__(973)
+const path = __webpack_require__(622)
+const parseUrl = __webpack_require__(304)
+const { send, status } = __webpack_require__(876)
 
 module.exports = async (availableRoutes, req, res) => {
     try {
-        const parsedRouteUrl = parseUrl(req.url);
-        let handlerPath = '';
-        let currentPointer = availableRoutes;
+        const parsedRouteUrl = parseUrl(req.url)
 
-        // Attach Helpers
-        res.send = send(res);
-        res.status = status(res);
-        //
+        let handlerPath = ''
+        let currentPointer = availableRoutes['.']
 
-        parsedRouteUrl.paths.forEach((item) => {
-            let matchingKey;
+        for (let i = 0; i < parsedRouteUrl.paths.length; i += 1) {
+            const item = parsedRouteUrl.paths[i]
+            let matchingKey
             if (!currentPointer[item]) {
                 matchingKey = Object.keys(currentPointer).find(
                     (key) =>
                         currentPointer[key].params &&
                         currentPointer[key].params.length > 0
-                );
+                )
 
                 if (matchingKey) {
-                    currentPointer = currentPointer[matchingKey];
-                    const key = matchingKey.replace(/[\[\]]/g, '');
+                    currentPointer = currentPointer[matchingKey]
+                    const key = matchingKey.replace(/[\[\]]/g, '')
                     req.params = {
                         ...req.params,
                         [key]: item,
-                    };
+                    }
                 } else {
-                    currentPointer = null;
-                    return;
+                    currentPointer = null
+                    break
                 }
             } else {
-                currentPointer = currentPointer[item];
+                currentPointer = currentPointer[item]
             }
 
             if (currentPointer) {
                 if (currentPointer.type === 'file') {
-                    handlerPath += currentPointer.index;
+                    handlerPath += currentPointer.index
                 } else {
                     if (matchingKey) {
-                        handlerPath += matchingKey + '/';
+                        handlerPath += matchingKey + '/'
                     } else {
-                        handlerPath += item + '/';
+                        handlerPath += item + '/'
                     }
                 }
             }
-        });
+        }
 
         if (!currentPointer || !currentPointer.type) {
-            res.statusCode = 404;
-            res.end();
-            return;
+            res.statusCode = 404
+            res.end()
+            return
         }
 
         if (currentPointer.type === 'dir') {
             if (currentPointer.index) {
-                handlerPath += currentPointer.index;
+                handlerPath += currentPointer.index
             } else {
-                res.statusCode = 404;
-                res.end();
-                return;
+                res.statusCode = 404
+                res.end()
+                return
             }
         }
 
-        let _handlerPath = path.join(basePath(), handlerPath);
+        let _handlerPath = path.join(basePath(), handlerPath)
 
-        req.query = parsedRouteUrl.query;
+        // Attach helpers and parsed query data
+        res.send = send(res)
+        res.status = status(res)
+        req.query = parsedRouteUrl.query
 
-        const handler = require(_handlerPath);
-
-        return handler(req, res);
+        return require(_handlerPath)(req, res)
     } catch (err) {
-        console.error(err);
-        res.statusCode(500);
-        res.end();
-        throw err;
+        console.error(err)
+        res.status(500)
+        res.end()
+        throw err
     }
-};
+}
 
 
 /***/ }),
@@ -146,18 +144,6 @@ module.exports = async (availableRoutes, req, res) => {
 /***/ (function(module) {
 
 module.exports = require("readline");
-
-/***/ }),
-
-/***/ 66:
-/***/ (function(module) {
-
-module.exports = (dirs) => {
-    const exists = dirs.find((item) => item === 'api');
-    const valid = exists ? true : false;
-    return { valid, path: exists };
-};
-
 
 /***/ }),
 
@@ -353,45 +339,254 @@ if ( true && module.exports) {
 
 /***/ }),
 
-/***/ 104:
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ 109:
+/***/ (function(module) {
 
-const basePath = __webpack_require__(973);
-const fs = __webpack_require__(747);
-const path = __webpack_require__(622);
+module.exports = function (args, opts) {
+    if (!opts) opts = {};
+    
+    var flags = { bools : {}, strings : {}, unknownFn: null };
 
-module.exports = async () => {
-    try {
-        const creationPath = path.join(basePath(), '.route');
-        const exists = await new Promise((resolve, reject) => {
-            fs.stat(creationPath, (err, stat) => {
-                if (
-                    (err && err.code === 'ENOENT') ||
-                    (err && err.code === 'ENOTDIR')
-                ) {
-                    resolve(false);
-                }
-                return resolve(true);
-            });
+    if (typeof opts['unknown'] === 'function') {
+        flags.unknownFn = opts['unknown'];
+    }
+
+    if (typeof opts['boolean'] === 'boolean' && opts['boolean']) {
+      flags.allBools = true;
+    } else {
+      [].concat(opts['boolean']).filter(Boolean).forEach(function (key) {
+          flags.bools[key] = true;
+      });
+    }
+    
+    var aliases = {};
+    Object.keys(opts.alias || {}).forEach(function (key) {
+        aliases[key] = [].concat(opts.alias[key]);
+        aliases[key].forEach(function (x) {
+            aliases[x] = [key].concat(aliases[key].filter(function (y) {
+                return x !== y;
+            }));
         });
+    });
 
-        if (exists) {
-            return creationPath;
-        } else {
-            await new Promise((resolve, reject) => {
-                fs.mkdir(creationPath, (err, done) => {
-                    if (err) reject(err);
-                    resolve(done);
-                });
-            });
+    [].concat(opts.string).filter(Boolean).forEach(function (key) {
+        flags.strings[key] = true;
+        if (aliases[key]) {
+            flags.strings[aliases[key]] = true;
+        }
+     });
+
+    var defaults = opts['default'] || {};
+    
+    var argv = { _ : [] };
+    Object.keys(flags.bools).forEach(function (key) {
+        setArg(key, defaults[key] === undefined ? false : defaults[key]);
+    });
+    
+    var notFlags = [];
+
+    if (args.indexOf('--') !== -1) {
+        notFlags = args.slice(args.indexOf('--')+1);
+        args = args.slice(0, args.indexOf('--'));
+    }
+
+    function argDefined(key, arg) {
+        return (flags.allBools && /^--[^=]+$/.test(arg)) ||
+            flags.strings[key] || flags.bools[key] || aliases[key];
+    }
+
+    function setArg (key, val, arg) {
+        if (arg && flags.unknownFn && !argDefined(key, arg)) {
+            if (flags.unknownFn(arg) === false) return;
         }
 
-        return creationPath;
-    } catch (err) {
-        console.error(err);
-        throw err;
+        var value = !flags.strings[key] && isNumber(val)
+            ? Number(val) : val
+        ;
+        setKey(argv, key.split('.'), value);
+        
+        (aliases[key] || []).forEach(function (x) {
+            setKey(argv, x.split('.'), value);
+        });
     }
+
+    function setKey (obj, keys, value) {
+        var o = obj;
+        for (var i = 0; i < keys.length-1; i++) {
+            var key = keys[i];
+            if (key === '__proto__') return;
+            if (o[key] === undefined) o[key] = {};
+            if (o[key] === Object.prototype || o[key] === Number.prototype
+                || o[key] === String.prototype) o[key] = {};
+            if (o[key] === Array.prototype) o[key] = [];
+            o = o[key];
+        }
+
+        var key = keys[keys.length - 1];
+        if (key === '__proto__') return;
+        if (o === Object.prototype || o === Number.prototype
+            || o === String.prototype) o = {};
+        if (o === Array.prototype) o = [];
+        if (o[key] === undefined || flags.bools[key] || typeof o[key] === 'boolean') {
+            o[key] = value;
+        }
+        else if (Array.isArray(o[key])) {
+            o[key].push(value);
+        }
+        else {
+            o[key] = [ o[key], value ];
+        }
+    }
+    
+    function aliasIsBoolean(key) {
+      return aliases[key].some(function (x) {
+          return flags.bools[x];
+      });
+    }
+
+    for (var i = 0; i < args.length; i++) {
+        var arg = args[i];
+        
+        if (/^--.+=/.test(arg)) {
+            // Using [\s\S] instead of . because js doesn't support the
+            // 'dotall' regex modifier. See:
+            // http://stackoverflow.com/a/1068308/13216
+            var m = arg.match(/^--([^=]+)=([\s\S]*)$/);
+            var key = m[1];
+            var value = m[2];
+            if (flags.bools[key]) {
+                value = value !== 'false';
+            }
+            setArg(key, value, arg);
+        }
+        else if (/^--no-.+/.test(arg)) {
+            var key = arg.match(/^--no-(.+)/)[1];
+            setArg(key, false, arg);
+        }
+        else if (/^--.+/.test(arg)) {
+            var key = arg.match(/^--(.+)/)[1];
+            var next = args[i + 1];
+            if (next !== undefined && !/^-/.test(next)
+            && !flags.bools[key]
+            && !flags.allBools
+            && (aliases[key] ? !aliasIsBoolean(key) : true)) {
+                setArg(key, next, arg);
+                i++;
+            }
+            else if (/^(true|false)$/.test(next)) {
+                setArg(key, next === 'true', arg);
+                i++;
+            }
+            else {
+                setArg(key, flags.strings[key] ? '' : true, arg);
+            }
+        }
+        else if (/^-[^-]+/.test(arg)) {
+            var letters = arg.slice(1,-1).split('');
+            
+            var broken = false;
+            for (var j = 0; j < letters.length; j++) {
+                var next = arg.slice(j+2);
+                
+                if (next === '-') {
+                    setArg(letters[j], next, arg)
+                    continue;
+                }
+                
+                if (/[A-Za-z]/.test(letters[j]) && /=/.test(next)) {
+                    setArg(letters[j], next.split('=')[1], arg);
+                    broken = true;
+                    break;
+                }
+                
+                if (/[A-Za-z]/.test(letters[j])
+                && /-?\d+(\.\d*)?(e-?\d+)?$/.test(next)) {
+                    setArg(letters[j], next, arg);
+                    broken = true;
+                    break;
+                }
+                
+                if (letters[j+1] && letters[j+1].match(/\W/)) {
+                    setArg(letters[j], arg.slice(j+2), arg);
+                    broken = true;
+                    break;
+                }
+                else {
+                    setArg(letters[j], flags.strings[letters[j]] ? '' : true, arg);
+                }
+            }
+            
+            var key = arg.slice(-1)[0];
+            if (!broken && key !== '-') {
+                if (args[i+1] && !/^(-|--)[^-]/.test(args[i+1])
+                && !flags.bools[key]
+                && (aliases[key] ? !aliasIsBoolean(key) : true)) {
+                    setArg(key, args[i+1], arg);
+                    i++;
+                }
+                else if (args[i+1] && /^(true|false)$/.test(args[i+1])) {
+                    setArg(key, args[i+1] === 'true', arg);
+                    i++;
+                }
+                else {
+                    setArg(key, flags.strings[key] ? '' : true, arg);
+                }
+            }
+        }
+        else {
+            if (!flags.unknownFn || flags.unknownFn(arg) !== false) {
+                argv._.push(
+                    flags.strings['_'] || !isNumber(arg) ? arg : Number(arg)
+                );
+            }
+            if (opts.stopEarly) {
+                argv._.push.apply(argv._, args.slice(i + 1));
+                break;
+            }
+        }
+    }
+    
+    Object.keys(defaults).forEach(function (key) {
+        if (!hasKey(argv, key.split('.'))) {
+            setKey(argv, key.split('.'), defaults[key]);
+            
+            (aliases[key] || []).forEach(function (x) {
+                setKey(argv, x.split('.'), defaults[key]);
+            });
+        }
+    });
+    
+    if (opts['--']) {
+        argv['--'] = new Array();
+        notFlags.forEach(function(key) {
+            argv['--'].push(key);
+        });
+    }
+    else {
+        notFlags.forEach(function(key) {
+            argv._.push(key);
+        });
+    }
+
+    return argv;
 };
+
+function hasKey (obj, keys) {
+    var o = obj;
+    keys.slice(0,-1).forEach(function (key) {
+        o = (o[key] || {});
+    });
+
+    var key = keys[keys.length - 1];
+    return key in o;
+}
+
+function isNumber (x) {
+    if (typeof x === 'number') return true;
+    if (/^0x[0-9a-f]+$/i.test(x)) return true;
+    return /^[-+]?(?:\d+(?:\.\d*)?|\.\d+)(e[-+]?\d+)?$/.test(x);
+}
+
 
 
 /***/ }),
@@ -399,23 +594,14 @@ module.exports = async () => {
 /***/ 116:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const basePath = __webpack_require__(973);
-const fs = __webpack_require__(747);
-const path = __webpack_require__(622);
-const checkApiDir = __webpack_require__(66);
-const processDirectories = __webpack_require__(239);
+const basePath = __webpack_require__(973)
+const path = __webpack_require__(622)
+const processDirectories = __webpack_require__(239)
 
 module.exports = () => {
-    fs.readdir(basePath(), function (err, dirs) {
-        if (err) throw err;
-        const apiDirExists = checkApiDir(dirs);
-        if (!apiDirExists.valid) {
-            throw new Error('cannot find an `api` directory');
-        }
-        const processingPath = path.join(basePath());
-        return processDirectories(processingPath);
-    });
-};
+    const processingPath = path.join(basePath())
+    return processDirectories(processingPath)
+}
 
 
 /***/ }),
@@ -594,91 +780,82 @@ module.exports = function (str) {
 /***/ 168:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const fs = __webpack_require__(747).promises;
-const path = __webpack_require__(622);
+const fs = __webpack_require__(747).promises
+const path = __webpack_require__(622)
 
 module.exports = async (directory) => {
     try {
-        const routeTree = {};
-
-        let currentPointer = routeTree;
-
-        await processDirectory(directory, 'api', currentPointer);
-
-        return routeTree;
+        const routeTree = {}
+        let currentPointer = routeTree
+        await processDirectory(directory, '.', currentPointer)
+        return routeTree
     } catch (err) {
-        console.error(err);
-        throw err;
+        console.error(err)
+        throw err
     }
-};
+}
 
 async function processDirectory(currPath, dir, pointer) {
     try {
-        const pathToCheck = path.join(currPath, dir);
-        const pathStat = await fs.stat(pathToCheck);
+        const pathToCheck = path.join(currPath, dir)
+        const pathStat = await fs.stat(pathToCheck)
         if (pathStat.isDirectory()) {
-            const dirContent = await fs.readdir(pathToCheck);
+            const dirContent = await fs.readdir(pathToCheck)
             const treeMods = dirContent.map(async (fileRecord) => {
-                const nextPathToCheck = path.join(pathToCheck, fileRecord);
-                const nextFile = await fs.stat(nextPathToCheck);
+                const nextPathToCheck = path.join(pathToCheck, fileRecord)
+                const nextFile = await fs.stat(nextPathToCheck)
                 const nextPointer =
                     pointer[dir] ||
                     (pointer[dir] = {
                         type: 'dir',
-                    });
-                const paramRegex = /^\[(\w+)\]$/;
+                    })
+                const paramRegex = /^\[(\w+)\]$/
                 if (paramRegex.test(dir)) {
-                    debugger;
-                    const matchingParams = dir.match(paramRegex);
-                    const param = matchingParams[1];
-                    pointer[dir].params = [param];
-                    debugger;
+                    const matchingParams = dir.match(paramRegex)
+                    const param = matchingParams[1]
+                    pointer[dir].params = [param]
                 }
 
                 if (nextFile.isDirectory()) {
-                    await processDirectory(
-                        pathToCheck,
-                        fileRecord,
-                        nextPointer
-                    );
+                    await processDirectory(pathToCheck, fileRecord, nextPointer)
                 } else if (nextFile.isFile()) {
-                    processFile(fileRecord, nextPointer);
+                    processFile(fileRecord, nextPointer)
                 }
-                return Promise.resolve();
-            });
+                return Promise.resolve()
+            })
 
-            await Promise.all(treeMods);
+            await Promise.all(treeMods)
         } else if (pathStat.isFile()) {
-            processFile(dir, pointer);
+            processFile(dir, pointer)
         }
     } catch (err) {
-        console.error(err);
-        throw err;
+        console.error(err)
+        throw err
     }
 }
 
 function processFile(file, pointer) {
-    const paramRegex = /^\[(\w+)\].js$/;
+    const paramRegex = /^\[(\w+)\].js$/
     if (paramRegex.test(file)) {
-        const matchingParams = file.match(paramRegex);
-        const param = matchingParams[1];
-        const noExt = file.replace('.js', '');
+        const matchingParams = file.match(paramRegex)
+        const param = matchingParams[1]
+        const noExt = file.replace('.js', '')
         const valuesInsertion = {
             type: 'file',
             params: [param],
             index: file,
-        };
-        pointer[noExt] = valuesInsertion;
+        }
+        pointer[noExt] = valuesInsertion
     } else if (file === 'index.js') {
-        pointer.type = 'dir';
-        pointer.index = 'index.js';
+        pointer.type = 'dir'
+        pointer.index = 'index.js'
     } else {
-        const noExt = file.replace('.js', '');
+        const noExt = file.replace('.js', '')
         const valuesInsertion = {
             type: 'file',
             index: file,
-        };
-        pointer[noExt] = valuesInsertion;
+        }
+        pointer[noExt] = valuesInsertion
     }
 }
 
@@ -712,41 +889,23 @@ module.exports = require("querystring");
 /***/ 239:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const fs = __webpack_require__(747);
-const path = __webpack_require__(622);
-const createRouteDir = __webpack_require__(104);
-const createAvailableRoutes = __webpack_require__(168);
-const ora = __webpack_require__(937);
+const createAvailableRoutes = __webpack_require__(168)
+const ora = __webpack_require__(937)
 
 module.exports = async (directory) => {
-    const spinner = ora('Compiling...').start();
     try {
-        const availableRoutesTree = await createAvailableRoutes(directory);
-
-        const routePath = await createRouteDir();
-
-        await new Promise((resolve, reject) => {
-            fs.writeFile(
-                path.join(routePath, 'routes.json'),
-                JSON.stringify(availableRoutesTree),
-                (err, done) => {
-                    if (err) reject(err);
-                    resolve(done);
-                }
-            );
-        });
-
-        setTimeout(() => {
-            spinner.succeed('Compiled');
-        }, 1000);
+        const spinner = ora('Compiling...').start()
+        const availableRoutesTree = await createAvailableRoutes(directory)
+        spinner.succeed('Compiled')
+        return availableRoutesTree
     } catch (err) {
-        spinner.color = 'red';
-        spinner.text = 'Failed';
-        spinner.fail();
-        console.error(err);
-        throw err;
+        spinner.color = 'red'
+        spinner.text = 'Failed'
+        spinner.fail()
+        console.error(err)
+        throw err
     }
-};
+}
 
 
 /***/ }),
@@ -1208,21 +1367,21 @@ exports.toggle = (force, writableStream) => {
 /***/ 304:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const url = __webpack_require__(835);
-const querystring = __webpack_require__(191);
+const url = __webpack_require__(835)
+const querystring = __webpack_require__(191)
 
 module.exports = (urlstring) => {
-    const _url = url.parse(urlstring);
-    const paths = _url.pathname.split('/').filter((item) => item);
-    let queryParams = {};
+    const _url = url.parse(urlstring)
+    const paths = _url.pathname.split('/').filter((item) => item)
+    let queryParams = {}
     if (_url.search && _url.search.length > 0) {
-        queryParams = querystring.parse(_url.search.replace('?', ''));
+        queryParams = querystring.parse(_url.search.replace('?', ''))
     }
     return {
         paths,
         query: queryParams,
-    };
-};
+    }
+}
 
 
 /***/ }),
@@ -2387,21 +2546,21 @@ module.exports = require("stream");
 /***/ (function(module) {
 
 module.exports = (res, type) => {
-    let _type = type;
+    let _type = type
 
     const cases = {
         json: 'application/json',
         buffer: 'application/octet-stream',
         text: 'text/html',
-    };
-
-    if (!cases[type]) {
-        _type = cases.text;
     }
 
-    res.setHeader('Content-Type', _type);
-    return;
-};
+    if (!cases[type]) {
+        _type = cases.text
+    }
+
+    res.setHeader('Content-Type', _type)
+    return
+}
 
 
 /***/ }),
@@ -2419,53 +2578,6 @@ module.exports = ({onlyFirst = false} = {}) => {
 	].join('|');
 
 	return new RegExp(pattern, onlyFirst ? undefined : 'g');
-};
-
-
-/***/ }),
-
-/***/ 493:
-/***/ (function(module) {
-
-"use strict";
-
-
-const stringReplaceAll = (string, substring, replacer) => {
-	let index = string.indexOf(substring);
-	if (index === -1) {
-		return string;
-	}
-
-	const substringLength = substring.length;
-	let endIndex = 0;
-	let returnValue = '';
-	do {
-		returnValue += string.substr(endIndex, index - endIndex) + substring + replacer;
-		endIndex = index + substringLength;
-		index = string.indexOf(substring, endIndex);
-	} while (index !== -1);
-
-	returnValue += string.substr(endIndex);
-	return returnValue;
-};
-
-const stringEncaseCRLFWithFirstIndex = (string, prefix, postfix, index) => {
-	let endIndex = 0;
-	let returnValue = '';
-	do {
-		const gotCR = string[index - 1] === '\r';
-		returnValue += string.substr(endIndex, (gotCR ? index - 1 : index) - endIndex) + prefix + (gotCR ? '\r\n' : '\n') + postfix;
-		endIndex = index + 1;
-		index = string.indexOf('\n', endIndex);
-	} while (index !== -1);
-
-	returnValue += string.substr(endIndex);
-	return returnValue;
-};
-
-module.exports = {
-	stringReplaceAll,
-	stringEncaseCRLFWithFirstIndex
 };
 
 
@@ -2644,19 +2756,16 @@ function processEmit (ev, arg) {
 /***/ 544:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const router = __webpack_require__(22);
-const getAvailableRoutes = __webpack_require__(917);
+const router = __webpack_require__(22)
 
-module.exports = async (req, res) => {
+module.exports = async (req, res, availableRoutes) => {
     try {
-        const availableRoutes = await getAvailableRoutes();
-
-        return router(availableRoutes, req, res);
+        return router(availableRoutes, req, res)
     } catch (err) {
-        console.error(err);
-        throw err;
+        console.error(err)
+        throw err
     }
-};
+}
 
 
 /***/ }),
@@ -3868,6 +3977,148 @@ module.exports = require("http");
 
 /***/ }),
 
+/***/ 606:
+/***/ (function(module) {
+
+"use strict";
+
+const TEMPLATE_REGEX = /(?:\\(u(?:[a-f\d]{4}|\{[a-f\d]{1,6}\})|x[a-f\d]{2}|.))|(?:\{(~)?(\w+(?:\([^)]*\))?(?:\.\w+(?:\([^)]*\))?)*)(?:[ \t]|(?=\r?\n)))|(\})|((?:.|[\r\n\f])+?)/gi;
+const STYLE_REGEX = /(?:^|\.)(\w+)(?:\(([^)]*)\))?/g;
+const STRING_REGEX = /^(['"])((?:\\.|(?!\1)[^\\])*)\1$/;
+const ESCAPE_REGEX = /\\(u(?:[a-f\d]{4}|\{[a-f\d]{1,6}\})|x[a-f\d]{2}|.)|([^\\])/gi;
+
+const ESCAPES = new Map([
+	['n', '\n'],
+	['r', '\r'],
+	['t', '\t'],
+	['b', '\b'],
+	['f', '\f'],
+	['v', '\v'],
+	['0', '\0'],
+	['\\', '\\'],
+	['e', '\u001B'],
+	['a', '\u0007']
+]);
+
+function unescape(c) {
+	const u = c[0] === 'u';
+	const bracket = c[1] === '{';
+
+	if ((u && !bracket && c.length === 5) || (c[0] === 'x' && c.length === 3)) {
+		return String.fromCharCode(parseInt(c.slice(1), 16));
+	}
+
+	if (u && bracket) {
+		return String.fromCodePoint(parseInt(c.slice(2, -1), 16));
+	}
+
+	return ESCAPES.get(c) || c;
+}
+
+function parseArguments(name, arguments_) {
+	const results = [];
+	const chunks = arguments_.trim().split(/\s*,\s*/g);
+	let matches;
+
+	for (const chunk of chunks) {
+		const number = Number(chunk);
+		if (!Number.isNaN(number)) {
+			results.push(number);
+		} else if ((matches = chunk.match(STRING_REGEX))) {
+			results.push(matches[2].replace(ESCAPE_REGEX, (m, escape, character) => escape ? unescape(escape) : character));
+		} else {
+			throw new Error(`Invalid Chalk template style argument: ${chunk} (in style '${name}')`);
+		}
+	}
+
+	return results;
+}
+
+function parseStyle(style) {
+	STYLE_REGEX.lastIndex = 0;
+
+	const results = [];
+	let matches;
+
+	while ((matches = STYLE_REGEX.exec(style)) !== null) {
+		const name = matches[1];
+
+		if (matches[2]) {
+			const args = parseArguments(name, matches[2]);
+			results.push([name].concat(args));
+		} else {
+			results.push([name]);
+		}
+	}
+
+	return results;
+}
+
+function buildStyle(chalk, styles) {
+	const enabled = {};
+
+	for (const layer of styles) {
+		for (const style of layer.styles) {
+			enabled[style[0]] = layer.inverse ? null : style.slice(1);
+		}
+	}
+
+	let current = chalk;
+	for (const [styleName, styles] of Object.entries(enabled)) {
+		if (!Array.isArray(styles)) {
+			continue;
+		}
+
+		if (!(styleName in current)) {
+			throw new Error(`Unknown Chalk style: ${styleName}`);
+		}
+
+		current = styles.length > 0 ? current[styleName](...styles) : current[styleName];
+	}
+
+	return current;
+}
+
+module.exports = (chalk, temporary) => {
+	const styles = [];
+	const chunks = [];
+	let chunk = [];
+
+	// eslint-disable-next-line max-params
+	temporary.replace(TEMPLATE_REGEX, (m, escapeCharacter, inverse, style, close, character) => {
+		if (escapeCharacter) {
+			chunk.push(unescape(escapeCharacter));
+		} else if (style) {
+			const string = chunk.join('');
+			chunk = [];
+			chunks.push(styles.length === 0 ? string : buildStyle(chalk, styles)(string));
+			styles.push({inverse, styles: parseStyle(style)});
+		} else if (close) {
+			if (styles.length === 0) {
+				throw new Error('Found extraneous } in Chalk template literal');
+			}
+
+			chunks.push(buildStyle(chalk, styles)(chunk.join('')));
+			chunk = [];
+			styles.pop();
+		} else {
+			chunk.push(character);
+		}
+	});
+
+	chunks.push(chunk.join(''));
+
+	if (styles.length > 0) {
+		const errMsg = `Chalk template literal is missing ${styles.length} closing bracket${styles.length === 1 ? '' : 's'} (\`}\`)`;
+		throw new Error(errMsg);
+	}
+
+	return chunks.join('');
+};
+
+
+/***/ }),
+
 /***/ 614:
 /***/ (function(module) {
 
@@ -4178,148 +4429,6 @@ module.exports = {"dots":{"interval":80,"frames":["⠋","⠙","⠹","⠸","⠼",
 
 /***/ }),
 
-/***/ 706:
-/***/ (function(module) {
-
-"use strict";
-
-const TEMPLATE_REGEX = /(?:\\(u(?:[a-f\d]{4}|\{[a-f\d]{1,6}\})|x[a-f\d]{2}|.))|(?:\{(~)?(\w+(?:\([^)]*\))?(?:\.\w+(?:\([^)]*\))?)*)(?:[ \t]|(?=\r?\n)))|(\})|((?:.|[\r\n\f])+?)/gi;
-const STYLE_REGEX = /(?:^|\.)(\w+)(?:\(([^)]*)\))?/g;
-const STRING_REGEX = /^(['"])((?:\\.|(?!\1)[^\\])*)\1$/;
-const ESCAPE_REGEX = /\\(u(?:[a-f\d]{4}|\{[a-f\d]{1,6}\})|x[a-f\d]{2}|.)|([^\\])/gi;
-
-const ESCAPES = new Map([
-	['n', '\n'],
-	['r', '\r'],
-	['t', '\t'],
-	['b', '\b'],
-	['f', '\f'],
-	['v', '\v'],
-	['0', '\0'],
-	['\\', '\\'],
-	['e', '\u001B'],
-	['a', '\u0007']
-]);
-
-function unescape(c) {
-	const u = c[0] === 'u';
-	const bracket = c[1] === '{';
-
-	if ((u && !bracket && c.length === 5) || (c[0] === 'x' && c.length === 3)) {
-		return String.fromCharCode(parseInt(c.slice(1), 16));
-	}
-
-	if (u && bracket) {
-		return String.fromCodePoint(parseInt(c.slice(2, -1), 16));
-	}
-
-	return ESCAPES.get(c) || c;
-}
-
-function parseArguments(name, arguments_) {
-	const results = [];
-	const chunks = arguments_.trim().split(/\s*,\s*/g);
-	let matches;
-
-	for (const chunk of chunks) {
-		const number = Number(chunk);
-		if (!Number.isNaN(number)) {
-			results.push(number);
-		} else if ((matches = chunk.match(STRING_REGEX))) {
-			results.push(matches[2].replace(ESCAPE_REGEX, (m, escape, character) => escape ? unescape(escape) : character));
-		} else {
-			throw new Error(`Invalid Chalk template style argument: ${chunk} (in style '${name}')`);
-		}
-	}
-
-	return results;
-}
-
-function parseStyle(style) {
-	STYLE_REGEX.lastIndex = 0;
-
-	const results = [];
-	let matches;
-
-	while ((matches = STYLE_REGEX.exec(style)) !== null) {
-		const name = matches[1];
-
-		if (matches[2]) {
-			const args = parseArguments(name, matches[2]);
-			results.push([name].concat(args));
-		} else {
-			results.push([name]);
-		}
-	}
-
-	return results;
-}
-
-function buildStyle(chalk, styles) {
-	const enabled = {};
-
-	for (const layer of styles) {
-		for (const style of layer.styles) {
-			enabled[style[0]] = layer.inverse ? null : style.slice(1);
-		}
-	}
-
-	let current = chalk;
-	for (const [styleName, styles] of Object.entries(enabled)) {
-		if (!Array.isArray(styles)) {
-			continue;
-		}
-
-		if (!(styleName in current)) {
-			throw new Error(`Unknown Chalk style: ${styleName}`);
-		}
-
-		current = styles.length > 0 ? current[styleName](...styles) : current[styleName];
-	}
-
-	return current;
-}
-
-module.exports = (chalk, temporary) => {
-	const styles = [];
-	const chunks = [];
-	let chunk = [];
-
-	// eslint-disable-next-line max-params
-	temporary.replace(TEMPLATE_REGEX, (m, escapeCharacter, inverse, style, close, character) => {
-		if (escapeCharacter) {
-			chunk.push(unescape(escapeCharacter));
-		} else if (style) {
-			const string = chunk.join('');
-			chunk = [];
-			chunks.push(styles.length === 0 ? string : buildStyle(chalk, styles)(string));
-			styles.push({inverse, styles: parseStyle(style)});
-		} else if (close) {
-			if (styles.length === 0) {
-				throw new Error('Found extraneous } in Chalk template literal');
-			}
-
-			chunks.push(buildStyle(chalk, styles)(chunk.join('')));
-			chunk = [];
-			styles.pop();
-		} else {
-			chunk.push(character);
-		}
-	});
-
-	chunks.push(chunk.join(''));
-
-	if (styles.length > 0) {
-		const errMsg = `Chalk template literal is missing ${styles.length} closing bracket${styles.length === 1 ? '' : 's'} (\`}\`)`;
-		throw new Error(errMsg);
-	}
-
-	return chunks.join('');
-};
-
-
-/***/ }),
-
 /***/ 723:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -4421,6 +4530,53 @@ const mimicFn = (to, from) => {
 module.exports = mimicFn;
 // TODO: Remove this for the next major release
 module.exports.default = mimicFn;
+
+
+/***/ }),
+
+/***/ 754:
+/***/ (function(module) {
+
+"use strict";
+
+
+const stringReplaceAll = (string, substring, replacer) => {
+	let index = string.indexOf(substring);
+	if (index === -1) {
+		return string;
+	}
+
+	const substringLength = substring.length;
+	let endIndex = 0;
+	let returnValue = '';
+	do {
+		returnValue += string.substr(endIndex, index - endIndex) + substring + replacer;
+		endIndex = index + substringLength;
+		index = string.indexOf(substring, endIndex);
+	} while (index !== -1);
+
+	returnValue += string.substr(endIndex);
+	return returnValue;
+};
+
+const stringEncaseCRLFWithFirstIndex = (string, prefix, postfix, index) => {
+	let endIndex = 0;
+	let returnValue = '';
+	do {
+		const gotCR = string[index - 1] === '\r';
+		returnValue += string.substr(endIndex, (gotCR ? index - 1 : index) - endIndex) + prefix + (gotCR ? '\r\n' : '\n') + postfix;
+		endIndex = index + 1;
+		index = string.indexOf('\n', endIndex);
+	} while (index !== -1);
+
+	returnValue += string.substr(endIndex);
+	return returnValue;
+};
+
+module.exports = {
+	stringReplaceAll,
+	stringEncaseCRLFWithFirstIndex
+};
 
 
 /***/ }),
@@ -4555,6 +4711,247 @@ module.exports = require("url");
 
 /***/ }),
 
+/***/ 843:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const ansiStyles = __webpack_require__(663);
+const {stdout: stdoutColor, stderr: stderrColor} = __webpack_require__(247);
+const {
+	stringReplaceAll,
+	stringEncaseCRLFWithFirstIndex
+} = __webpack_require__(754);
+
+// `supportsColor.level` → `ansiStyles.color[name]` mapping
+const levelMapping = [
+	'ansi',
+	'ansi',
+	'ansi256',
+	'ansi16m'
+];
+
+const styles = Object.create(null);
+
+const applyOptions = (object, options = {}) => {
+	if (options.level > 3 || options.level < 0) {
+		throw new Error('The `level` option should be an integer from 0 to 3');
+	}
+
+	// Detect level if not set manually
+	const colorLevel = stdoutColor ? stdoutColor.level : 0;
+	object.level = options.level === undefined ? colorLevel : options.level;
+};
+
+class ChalkClass {
+	constructor(options) {
+		return chalkFactory(options);
+	}
+}
+
+const chalkFactory = options => {
+	const chalk = {};
+	applyOptions(chalk, options);
+
+	chalk.template = (...arguments_) => chalkTag(chalk.template, ...arguments_);
+
+	Object.setPrototypeOf(chalk, Chalk.prototype);
+	Object.setPrototypeOf(chalk.template, chalk);
+
+	chalk.template.constructor = () => {
+		throw new Error('`chalk.constructor()` is deprecated. Use `new chalk.Instance()` instead.');
+	};
+
+	chalk.template.Instance = ChalkClass;
+
+	return chalk.template;
+};
+
+function Chalk(options) {
+	return chalkFactory(options);
+}
+
+for (const [styleName, style] of Object.entries(ansiStyles)) {
+	styles[styleName] = {
+		get() {
+			const builder = createBuilder(this, createStyler(style.open, style.close, this._styler), this._isEmpty);
+			Object.defineProperty(this, styleName, {value: builder});
+			return builder;
+		}
+	};
+}
+
+styles.visible = {
+	get() {
+		const builder = createBuilder(this, this._styler, true);
+		Object.defineProperty(this, 'visible', {value: builder});
+		return builder;
+	}
+};
+
+const usedModels = ['rgb', 'hex', 'keyword', 'hsl', 'hsv', 'hwb', 'ansi', 'ansi256'];
+
+for (const model of usedModels) {
+	styles[model] = {
+		get() {
+			const {level} = this;
+			return function (...arguments_) {
+				const styler = createStyler(ansiStyles.color[levelMapping[level]][model](...arguments_), ansiStyles.color.close, this._styler);
+				return createBuilder(this, styler, this._isEmpty);
+			};
+		}
+	};
+}
+
+for (const model of usedModels) {
+	const bgModel = 'bg' + model[0].toUpperCase() + model.slice(1);
+	styles[bgModel] = {
+		get() {
+			const {level} = this;
+			return function (...arguments_) {
+				const styler = createStyler(ansiStyles.bgColor[levelMapping[level]][model](...arguments_), ansiStyles.bgColor.close, this._styler);
+				return createBuilder(this, styler, this._isEmpty);
+			};
+		}
+	};
+}
+
+const proto = Object.defineProperties(() => {}, {
+	...styles,
+	level: {
+		enumerable: true,
+		get() {
+			return this._generator.level;
+		},
+		set(level) {
+			this._generator.level = level;
+		}
+	}
+});
+
+const createStyler = (open, close, parent) => {
+	let openAll;
+	let closeAll;
+	if (parent === undefined) {
+		openAll = open;
+		closeAll = close;
+	} else {
+		openAll = parent.openAll + open;
+		closeAll = close + parent.closeAll;
+	}
+
+	return {
+		open,
+		close,
+		openAll,
+		closeAll,
+		parent
+	};
+};
+
+const createBuilder = (self, _styler, _isEmpty) => {
+	const builder = (...arguments_) => {
+		// Single argument is hot path, implicit coercion is faster than anything
+		// eslint-disable-next-line no-implicit-coercion
+		return applyStyle(builder, (arguments_.length === 1) ? ('' + arguments_[0]) : arguments_.join(' '));
+	};
+
+	// `__proto__` is used because we must return a function, but there is
+	// no way to create a function with a different prototype
+	builder.__proto__ = proto; // eslint-disable-line no-proto
+
+	builder._generator = self;
+	builder._styler = _styler;
+	builder._isEmpty = _isEmpty;
+
+	return builder;
+};
+
+const applyStyle = (self, string) => {
+	if (self.level <= 0 || !string) {
+		return self._isEmpty ? '' : string;
+	}
+
+	let styler = self._styler;
+
+	if (styler === undefined) {
+		return string;
+	}
+
+	const {openAll, closeAll} = styler;
+	if (string.indexOf('\u001B') !== -1) {
+		while (styler !== undefined) {
+			// Replace any instances already present with a re-opening code
+			// otherwise only the part of the string until said closing code
+			// will be colored, and the rest will simply be 'plain'.
+			string = stringReplaceAll(string, styler.close, styler.open);
+
+			styler = styler.parent;
+		}
+	}
+
+	// We can move both next actions out of loop, because remaining actions in loop won't have
+	// any/visible effect on parts we add here. Close the styling before a linebreak and reopen
+	// after next line to fix a bleed issue on macOS: https://github.com/chalk/chalk/pull/92
+	const lfIndex = string.indexOf('\n');
+	if (lfIndex !== -1) {
+		string = stringEncaseCRLFWithFirstIndex(string, closeAll, openAll, lfIndex);
+	}
+
+	return openAll + string + closeAll;
+};
+
+let template;
+const chalkTag = (chalk, ...strings) => {
+	const [firstString] = strings;
+
+	if (!Array.isArray(firstString)) {
+		// If chalk() was called by itself or with a string,
+		// return the string itself as a string.
+		return strings.join(' ');
+	}
+
+	const arguments_ = strings.slice(1);
+	const parts = [firstString.raw[0]];
+
+	for (let i = 1; i < firstString.length; i++) {
+		parts.push(
+			String(arguments_[i - 1]).replace(/[{}\\]/g, '\\$&'),
+			String(firstString.raw[i])
+		);
+	}
+
+	if (template === undefined) {
+		template = __webpack_require__(606);
+	}
+
+	return template(chalk, parts.join(''));
+};
+
+Object.defineProperties(Chalk.prototype, styles);
+
+const chalk = Chalk(); // eslint-disable-line new-cap
+chalk.supportsColor = stdoutColor;
+chalk.stderr = Chalk({level: stderrColor ? stderrColor.level : 0}); // eslint-disable-line new-cap
+chalk.stderr.supportsColor = stderrColor;
+
+// For TypeScript
+chalk.Level = {
+	None: 0,
+	Basic: 1,
+	Ansi256: 2,
+	TrueColor: 3,
+	0: 'None',
+	1: 'Basic',
+	2: 'Ansi256',
+	3: 'TrueColor'
+};
+
+module.exports = chalk;
+
+
+/***/ }),
+
 /***/ 867:
 /***/ (function(module) {
 
@@ -4565,41 +4962,41 @@ module.exports = require("tty");
 /***/ 876:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-const setContentType = __webpack_require__(427);
+const setContentType = __webpack_require__(427)
 
 exports.status = (res) => {
     return (code) => {
         if (typeof code !== 'number') {
-            throw new Error('Status Code should be a number');
+            throw new Error('Status Code should be a number')
         }
-        return (res.statusCode = code);
-    };
-};
+        return (res.statusCode = code)
+    }
+}
 
 exports.send = (res) => {
     return (body) => {
-        let _body = body;
+        let _body = body
         if (Buffer.isBuffer(body)) {
-            setContentType(res, 'buffer');
+            setContentType(res, 'buffer')
         } else if (typeof body === 'string') {
-            setContentType(res, 'text');
+            setContentType(res, 'text')
         } else if (
             typeof body === 'object' ||
             typeof body === 'boolean' ||
             typeof body === 'number'
         ) {
             if (_body === null) {
-                _body = '';
+                _body = ''
             }
-            _body = JSON.stringify(_body);
-            setContentType(res, 'json');
+            _body = JSON.stringify(_body)
+            setContentType(res, 'json')
         }
 
-        res.write(_body);
-        res.end();
-        return;
-    };
-};
+        res.write(_body)
+        res.end()
+        return
+    }
+}
 
 
 /***/ }),
@@ -5042,32 +5439,6 @@ Object.defineProperty(module, 'exports', {
 
 /***/ }),
 
-/***/ 917:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const fs = __webpack_require__(747);
-const createRouteDir = __webpack_require__(104);
-const path = __webpack_require__(622);
-
-module.exports = async () => {
-    try {
-        const routeDir = await createRouteDir();
-
-        return new Promise((resolve, reject) => {
-            fs.readFile(path.join(routeDir, 'routes.json'), (err, data) => {
-                if (err) reject(err);
-                resolve(JSON.parse(Buffer.from(data).toString()));
-            });
-        });
-    } catch (err) {
-        console.error(err);
-        throw err;
-    }
-};
-
-
-/***/ }),
-
 /***/ 927:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -5207,254 +5578,13 @@ module.exports = {
 
 /***/ }),
 
-/***/ 931:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-const ansiStyles = __webpack_require__(663);
-const {stdout: stdoutColor, stderr: stderrColor} = __webpack_require__(247);
-const {
-	stringReplaceAll,
-	stringEncaseCRLFWithFirstIndex
-} = __webpack_require__(493);
-
-// `supportsColor.level` → `ansiStyles.color[name]` mapping
-const levelMapping = [
-	'ansi',
-	'ansi',
-	'ansi256',
-	'ansi16m'
-];
-
-const styles = Object.create(null);
-
-const applyOptions = (object, options = {}) => {
-	if (options.level > 3 || options.level < 0) {
-		throw new Error('The `level` option should be an integer from 0 to 3');
-	}
-
-	// Detect level if not set manually
-	const colorLevel = stdoutColor ? stdoutColor.level : 0;
-	object.level = options.level === undefined ? colorLevel : options.level;
-};
-
-class ChalkClass {
-	constructor(options) {
-		return chalkFactory(options);
-	}
-}
-
-const chalkFactory = options => {
-	const chalk = {};
-	applyOptions(chalk, options);
-
-	chalk.template = (...arguments_) => chalkTag(chalk.template, ...arguments_);
-
-	Object.setPrototypeOf(chalk, Chalk.prototype);
-	Object.setPrototypeOf(chalk.template, chalk);
-
-	chalk.template.constructor = () => {
-		throw new Error('`chalk.constructor()` is deprecated. Use `new chalk.Instance()` instead.');
-	};
-
-	chalk.template.Instance = ChalkClass;
-
-	return chalk.template;
-};
-
-function Chalk(options) {
-	return chalkFactory(options);
-}
-
-for (const [styleName, style] of Object.entries(ansiStyles)) {
-	styles[styleName] = {
-		get() {
-			const builder = createBuilder(this, createStyler(style.open, style.close, this._styler), this._isEmpty);
-			Object.defineProperty(this, styleName, {value: builder});
-			return builder;
-		}
-	};
-}
-
-styles.visible = {
-	get() {
-		const builder = createBuilder(this, this._styler, true);
-		Object.defineProperty(this, 'visible', {value: builder});
-		return builder;
-	}
-};
-
-const usedModels = ['rgb', 'hex', 'keyword', 'hsl', 'hsv', 'hwb', 'ansi', 'ansi256'];
-
-for (const model of usedModels) {
-	styles[model] = {
-		get() {
-			const {level} = this;
-			return function (...arguments_) {
-				const styler = createStyler(ansiStyles.color[levelMapping[level]][model](...arguments_), ansiStyles.color.close, this._styler);
-				return createBuilder(this, styler, this._isEmpty);
-			};
-		}
-	};
-}
-
-for (const model of usedModels) {
-	const bgModel = 'bg' + model[0].toUpperCase() + model.slice(1);
-	styles[bgModel] = {
-		get() {
-			const {level} = this;
-			return function (...arguments_) {
-				const styler = createStyler(ansiStyles.bgColor[levelMapping[level]][model](...arguments_), ansiStyles.bgColor.close, this._styler);
-				return createBuilder(this, styler, this._isEmpty);
-			};
-		}
-	};
-}
-
-const proto = Object.defineProperties(() => {}, {
-	...styles,
-	level: {
-		enumerable: true,
-		get() {
-			return this._generator.level;
-		},
-		set(level) {
-			this._generator.level = level;
-		}
-	}
-});
-
-const createStyler = (open, close, parent) => {
-	let openAll;
-	let closeAll;
-	if (parent === undefined) {
-		openAll = open;
-		closeAll = close;
-	} else {
-		openAll = parent.openAll + open;
-		closeAll = close + parent.closeAll;
-	}
-
-	return {
-		open,
-		close,
-		openAll,
-		closeAll,
-		parent
-	};
-};
-
-const createBuilder = (self, _styler, _isEmpty) => {
-	const builder = (...arguments_) => {
-		// Single argument is hot path, implicit coercion is faster than anything
-		// eslint-disable-next-line no-implicit-coercion
-		return applyStyle(builder, (arguments_.length === 1) ? ('' + arguments_[0]) : arguments_.join(' '));
-	};
-
-	// `__proto__` is used because we must return a function, but there is
-	// no way to create a function with a different prototype
-	builder.__proto__ = proto; // eslint-disable-line no-proto
-
-	builder._generator = self;
-	builder._styler = _styler;
-	builder._isEmpty = _isEmpty;
-
-	return builder;
-};
-
-const applyStyle = (self, string) => {
-	if (self.level <= 0 || !string) {
-		return self._isEmpty ? '' : string;
-	}
-
-	let styler = self._styler;
-
-	if (styler === undefined) {
-		return string;
-	}
-
-	const {openAll, closeAll} = styler;
-	if (string.indexOf('\u001B') !== -1) {
-		while (styler !== undefined) {
-			// Replace any instances already present with a re-opening code
-			// otherwise only the part of the string until said closing code
-			// will be colored, and the rest will simply be 'plain'.
-			string = stringReplaceAll(string, styler.close, styler.open);
-
-			styler = styler.parent;
-		}
-	}
-
-	// We can move both next actions out of loop, because remaining actions in loop won't have
-	// any/visible effect on parts we add here. Close the styling before a linebreak and reopen
-	// after next line to fix a bleed issue on macOS: https://github.com/chalk/chalk/pull/92
-	const lfIndex = string.indexOf('\n');
-	if (lfIndex !== -1) {
-		string = stringEncaseCRLFWithFirstIndex(string, closeAll, openAll, lfIndex);
-	}
-
-	return openAll + string + closeAll;
-};
-
-let template;
-const chalkTag = (chalk, ...strings) => {
-	const [firstString] = strings;
-
-	if (!Array.isArray(firstString)) {
-		// If chalk() was called by itself or with a string,
-		// return the string itself as a string.
-		return strings.join(' ');
-	}
-
-	const arguments_ = strings.slice(1);
-	const parts = [firstString.raw[0]];
-
-	for (let i = 1; i < firstString.length; i++) {
-		parts.push(
-			String(arguments_[i - 1]).replace(/[{}\\]/g, '\\$&'),
-			String(firstString.raw[i])
-		);
-	}
-
-	if (template === undefined) {
-		template = __webpack_require__(706);
-	}
-
-	return template(chalk, parts.join(''));
-};
-
-Object.defineProperties(Chalk.prototype, styles);
-
-const chalk = Chalk(); // eslint-disable-line new-cap
-chalk.supportsColor = stdoutColor;
-chalk.stderr = Chalk({level: stderrColor ? stderrColor.level : 0}); // eslint-disable-line new-cap
-chalk.stderr.supportsColor = stderrColor;
-
-// For TypeScript
-chalk.Level = {
-	None: 0,
-	Basic: 1,
-	Ansi256: 2,
-	TrueColor: 3,
-	0: 'None',
-	1: 'Basic',
-	2: 'Ansi256',
-	3: 'TrueColor'
-};
-
-module.exports = chalk;
-
-
-/***/ }),
-
 /***/ 937:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 const readline = __webpack_require__(58);
-const chalk = __webpack_require__(931);
+const chalk = __webpack_require__(843);
 const cliCursor = __webpack_require__(275);
 const cliSpinners = __webpack_require__(403);
 const logSymbols = __webpack_require__(598);
@@ -5815,29 +5945,44 @@ module.exports.promise = (action, options) => {
 /***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
 
-const microServer = __webpack_require__(544);
-const setupRoutes = __webpack_require__(116);
-const http = __webpack_require__(605);
-const PORT = process.env.PORT || 3000;
+const microServer = __webpack_require__(544)
+const setupRoutes = __webpack_require__(116)
+const http = __webpack_require__(605)
 
-setupRoutes();
+const argv = __webpack_require__(109)(process.argv.slice(2))
+const port = argv.p || argv.port || 3000
 
-http.createServer((req, res) => {
-    microServer(req, res);
-}).listen(PORT, () => {
-    console.log('> Listening on ' + PORT);
-});
+setupRoutes()
+    .then((availableRoutes) => {
+        http.createServer((req, res) => {
+            microServer(req, res, availableRoutes)
+        }).listen(port, () => {
+            console.log('> Listening on ' + port)
+        })
+    })
+    .catch((err) => {
+        console.log(err)
+        throw err
+    })
 
 
 /***/ }),
 
 /***/ 973:
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const path = __webpack_require__(622)
+const argv = __webpack_require__(109)(process.argv.slice(2))
+
+let _basePath
 
 module.exports = () => {
-    const currPath = `${process.cwd()}`;
-    return currPath;
-};
+    if (!_basePath) {
+        const dir = argv.d || argv.dir || 'api'
+        _basePath = path.join(process.cwd(), dir)
+    }
+    return _basePath
+}
 
 
 /***/ })

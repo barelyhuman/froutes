@@ -1,14 +1,21 @@
 #!/usr/bin/env node
 
-const microServer = require('./lib/micro-server');
-const setupRoutes = require('./lib/setup-routes');
-const http = require('http');
-const PORT = process.env.PORT || 3000;
+const microServer = require('./lib/micro-server')
+const setupRoutes = require('./lib/setup-routes')
+const http = require('http')
 
-setupRoutes();
+const argv = require('minimist')(process.argv.slice(2))
+const port = argv.p || argv.port || 3000
 
-http.createServer((req, res) => {
-    microServer(req, res);
-}).listen(PORT, () => {
-    console.log('> Listening on ' + PORT);
-});
+setupRoutes()
+    .then((availableRoutes) => {
+        http.createServer((req, res) => {
+            microServer(req, res, availableRoutes)
+        }).listen(port, () => {
+            console.log('> Listening on ' + port)
+        })
+    })
+    .catch((err) => {
+        console.log(err)
+        throw err
+    })

@@ -17,40 +17,43 @@
             A minimal file tree based api router for building rest api&#39;s
             with node.
         </p>
-        <h3 id="motivation">Motivation</h3>
+        <h3 id="about">About</h3>
         <p>
-            I&#39;m one of the many people who use
-            <a href="https://github.com/vercel/next.js">Next.js(Vercel)</a> and
-            while the whole framework is great, I&#39;m a huge fan of the API
-            routes mechanism and thought I&#39;d implement my own version of it
-            so I can continue having seperate backend and frontend code while
-            having the ease of writing api routes also, wanted to learn how this
-            stuff works. (I&#39;m curious like that).
+            RouteX started as a clone of the Next.js&#39; Api Routes
+            implmentation and is now on it&#39;s path to compete with other
+            frameworks as the simplest way to setup API routes. There&#39;s been
+            numerous posts on why using the folder tree makes it atomic and
+            easier to handle the separation between logic. While you cannot
+            bundle code with routex since each file is independent of the other
+            and doesn&#39;t need the others for its execution.
         </p>
-        <h3 id="roadmap-as-of-now">Roadmap (as of now)</h3>
+        <p>
+            The Idea and Inspiration for the creation remains to be Vercel&#39;s
+            Next.js
+        </p>
+        <h3 id="changes-6jul2020">Changes (6/Jul/2020)</h3>
         <ul>
             <li>
-                <input checked="" disabled="" type="checkbox" /> Start of simple
-                with something that can handle static routes.(Master and Canary)
+                Removed the <code>.route</code> folder for storing the compiled
+                routes
             </li>
             <li>
-                <input checked="" disabled="" type="checkbox" /> Add CLI tool to
-                be used with it (Master and Canary)
+                Root Folder routes are now accessible, you don&#39;t need to
+                specifically use an <code>api</code> folder anymore, you can use
+                any folder and the cli will consider it a route. Check CLI
+                Commands before to achieve this.
             </li>
             <li>
-                <input checked="" disabled="" type="checkbox" /> Add Dynamic
-                paths and parameter parsing. (Canary Only)
-            </li>
-            <li>
-                <input checked="" disabled="" type="checkbox" /> Add minimal
-                request and response helpers.
-            </li>
-            <li>
-                <input disabled="" type="checkbox" /> Add more features to CLI
-                (reloading, watchers, etc, etc)
+                CLI flag for custom port added to avoid using the general
+                environment variable
             </li>
         </ul>
-        <p>That&#39;s all I want the <code>routex</code> to do for now.</p>
+        <h3 id="performace">Performace</h3>
+        <p>
+            Screenshot of <code>autocannon</code> to benchmark
+            <code>/api</code> from the examples folder
+        </p>
+        <p><img src="/docs/perf.png" alt="GitHub Logo" /></p>
         <h3 id="warning">Warning</h3>
         <p>
             This library is still in active development and is bound to have
@@ -60,33 +63,31 @@
         <h3 id="current-limitations">Current Limitations</h3>
         <ul>
             <li>
-                <p>
-                    A very limited cli, no hot reload, no file watcher, it
-                    literally just runs a simple processor for reading the file
-                    system as of now.
-                </p>
-            </li>
-            <li>
-                <p>
-                    Since the lib uses the native node HTTP right now, you are
-                    limited to it&#39;s request and response functions.
-                </p>
+                A very limited cli, no hot reload, no file watcher, it literally
+                just runs a simple processor for reading the file system as of
+                now.
             </li>
         </ul>
-        <h3 id="usage">Usage</h3>
-        <p>
-            Any file inside the folder <code>api</code> is mapped to
-            <code>/api/*</code> and will be treated as an API endpoint and all
-            HTTP requests will be passed to this file. GET, POST, PUT, DELETE
-        </p>
+        <h3 id="installation">Installation</h3>
+        <h4 id="stable-cli">Stable Cli</h4>
         <pre><code class="language-sh"># for global install to avoid installing the devDependencies
 npm i -g barelyhuman/routex --only=prod
 # for local install to avoid installing the devDependencies
-npm i barelyhuman/routex --only=prod</code></pre>
+npm i barelyhuman/routex --only=prod
+</code></pre>
+        <h4 id="canary-cli">Canary Cli</h4>
+        <pre><code class="language-sh"># for global install to avoid installing the devDependencies
+npm i -g barelyhuman/routex#canary --only=prod
+# for local install to avoid installing the devDependencies
+npm i barelyhuman/routex#canary --only=prod</code></pre>
+        <h3 id="usage">Usage</h3>
         <p>
-            Then go ahead and create directories and files under the
-            <code>api</code> folder as mentioned or check the
-            <code>examples</code> folder for reference.
+            Any folder that routex is run in will be considered the API root and
+            will look for an <code>api</code> folder in the run location.
+        </p>
+        <p>
+            Then go ahead and create directories and files under any folder as
+            mentioned or check the <code>examples</code> folder for reference.
         </p>
         <p>Example file tree:</p>
         <pre><code>- api
@@ -119,18 +120,31 @@ npm i barelyhuman/routex --only=prod</code></pre>
 </code></pre>
         <p>
             Then run routex on the root folder of the project, this folder
-            should contain the <code>api</code> folder
+            should contain the <code>api</code> folder or specify a directory
+            using the <code>-d</code> or <code>--dir</code> command.
         </p>
         <pre><code class="language-sh"># If installed globally
 routex
 # If installed locally
 npx routex
 </code></pre>
-        <h3 id="rules">Rules</h3>
+        <h3 id="cli-commands">CLI Commands</h3>
         <ul>
-            <li>No copying of code from Next.js</li>
-            <li>Don&#39;t use micro, setup and parse node http from scratch</li>
-            <li>Try to keep it 0 Deps.</li>
+            <li>
+                <code>-d | --dir</code> to specify the directory to be used for
+                routes, defaults to <code>api</code>
+            </li>
+            <li>
+                <code>-p | --port</code> to specify the port to start the http
+                server on , defaults to <code>3000</code>
+            </li>
         </ul>
+        <p>
+            Example, the following would use the <code>example</code> folder as
+            the base path for the routes and start the server on port
+            <code>3001</code>
+        </p>
+        <pre><code class="language-sh">  routex -d ./example -p 3001
+</code></pre>
     </body>
 </html>
