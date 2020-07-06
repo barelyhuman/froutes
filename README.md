@@ -11,7 +11,7 @@ The Idea and Inspiration for the creation remains to be Vercel's Next.js
 ### Changes (6/Jul/2020)
 
 -   Removed the `.route` folder for storing the compiled routes
--   Root Folder routes are now accessible, you don't need to specifically use an `api` folder anymore, you can use any folder and the cli will consider it a route. Check CLI Commands before to achieve this.
+-   Root Folder routes are now accessible, you don't need to specifically use an `api` folder anymore, you can use any folder and the cli will consider it a route. Check CLI Commands below to achieve this.
 -   CLI flag for custom port added to avoid using the general environment variable
 
 ### Performace
