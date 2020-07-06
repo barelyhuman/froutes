@@ -18,7 +18,7 @@ The Idea and Inspiration for the creation remains to be Vercel's Next.js
 
 Screenshot of `autocannon` to benchmark `/api` from the examples folder
 
-![GitHub Logo](/docs/perf.png)
+![Performance Image](/docs/perf.png)
 
 ### Warning
 

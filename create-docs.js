@@ -4,7 +4,10 @@ const marked = require('marked')
 async function main() {
     try {
         const fileMarkdownString = await fs.readFile('README.md')
-        const htmlString = marked(fileMarkdownString.toString())
+        let htmlString = marked(fileMarkdownString.toString())
+
+        htmlString = htmlString.replace(/\/docs\/perf.png/, 'perf.png')
+
         const template = `
         <!DOCTYPE html>
         <html lang="en">
