@@ -13,6 +13,12 @@ The Idea and Inspiration for the creation remains to be Vercel's Next.js
 -   Removed the `.route` folder for storing the compiled routes
 -   Root Folder routes are now accessible, you don't need to specifically use an `api` folder anymore, you can use any folder and the cli will consider it a route.
 
+### Performace
+
+A small screenshot of `autocannon` benchmarking `/api` from the examples folder
+
+![GitHub Logo](/docs/performance.png)
+
 ### Warning
 
 This library is still in active development and is bound to have bugs , kindly make sure you use it only for testing and not for production as of now.

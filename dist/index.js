@@ -71,7 +71,8 @@ module.exports = async (availableRoutes, req, res) => {
         res.send = send(res)
         res.status = status(res)
 
-        parsedRouteUrl.paths.forEach((item) => {
+        for (let i = 0; i < parsedRouteUrl.paths.length; i += 1) {
+            const item = parsedRouteUrl.paths[i]
             let matchingKey
             if (!currentPointer[item]) {
                 matchingKey = Object.keys(currentPointer).find(
@@ -89,7 +90,7 @@ module.exports = async (availableRoutes, req, res) => {
                     }
                 } else {
                     currentPointer = null
-                    return
+                    break
                 }
             } else {
                 currentPointer = currentPointer[item]
@@ -106,7 +107,7 @@ module.exports = async (availableRoutes, req, res) => {
                     }
                 }
             }
-        })
+        }
 
         if (!currentPointer || !currentPointer.type) {
             res.statusCode = 404
@@ -128,9 +129,7 @@ module.exports = async (availableRoutes, req, res) => {
 
         req.query = parsedRouteUrl.query
 
-        const handler = require(_handlerPath)
-
-        return handler(req, res)
+        return require(_handlerPath)(req, res)
     } catch (err) {
         console.error(err)
         res.statusCode(500)
