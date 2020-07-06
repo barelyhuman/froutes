@@ -19,6 +19,11 @@ async function main() {
                     href="https://unpkg.com/sakura.css/css/sakura.css"
                     type="text/css"
                 />
+                <style>
+                    html,body{
+                        background:#fff;
+                    }
+                </style>
                 <title>Routex | API's made easy</title>
             </head>
         
