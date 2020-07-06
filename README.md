@@ -11,7 +11,8 @@ The Idea and Inspiration for the creation remains to be Vercel's Next.js
 ### Changes (6/Jul/2020)
 
 -   Removed the `.route` folder for storing the compiled routes
--   Root Folder routes are now accessible, you don't need to specifically use an `api` folder anymore, you can use any folder and the cli will consider it a route.
+-   Root Folder routes are now accessible, you don't need to specifically use an `api` folder anymore, you can use any folder and the cli will consider it a route. Check CLI Commands before to achieve this.
+-   CLI flag for custom port added to avoid using the general environment variable
 
 ### Performace
 
@@ -50,7 +51,7 @@ npm i barelyhuman/routex#canary --only=prod
 
 ### Usage
 
-Any folder that routex is run in will be considered the API root.
+Any folder that routex is run in will be considered the API root and will look for an `api` folder in the run location.
 
 Then go ahead and create directories and files under any folder as mentioned or check the `examples` folder for reference.
 
@@ -93,12 +94,24 @@ module.exports = (req, res) => {
 
 ```
 
-Then run routex on the root folder of the project, this folder should contain the `api` folder
+Then run routex on the root folder of the project, this folder should contain the `api` folder or specify a directory using the `-d` or `--dir` command.
 
 ```sh
 # If installed globally
 routex
 # If installed locally
 npx routex
+
+```
+
+### CLI Commands
+
+-   `-d | --dir` to specify the directory to be used for routes, defaults to `api`
+-   `-p | --port` to specify the port to start the http server on , defaults to `3000`
+
+Example, the following would use the `example` folder as the base path for the routes and start the server on port `3001`
+
+```sh
+  routex -d ./example -p 3001
 
 ```

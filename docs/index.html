@@ -40,7 +40,12 @@
             <li>
                 Root Folder routes are now accessible, you don&#39;t need to
                 specifically use an <code>api</code> folder anymore, you can use
-                any folder and the cli will consider it a route.
+                any folder and the cli will consider it a route. Check CLI
+                Commands before to achieve this.
+            </li>
+            <li>
+                CLI flag for custom port added to avoid using the general
+                environment variable
             </li>
         </ul>
         <h3 id="performace">Performace</h3>
@@ -76,7 +81,10 @@ npm i -g barelyhuman/routex#canary --only=prod
 # for local install to avoid installing the devDependencies
 npm i barelyhuman/routex#canary --only=prod</code></pre>
         <h3 id="usage">Usage</h3>
-        <p>Any folder that routex is run in will be considered the API root.</p>
+        <p>
+            Any folder that routex is run in will be considered the API root and
+            will look for an <code>api</code> folder in the run location.
+        </p>
         <p>
             Then go ahead and create directories and files under any folder as
             mentioned or check the <code>examples</code> folder for reference.
@@ -112,12 +120,31 @@ npm i barelyhuman/routex#canary --only=prod</code></pre>
 </code></pre>
         <p>
             Then run routex on the root folder of the project, this folder
-            should contain the <code>api</code> folder
+            should contain the <code>api</code> folder or specify a directory
+            using the <code>-d</code> or <code>--dir</code> command.
         </p>
         <pre><code class="language-sh"># If installed globally
 routex
 # If installed locally
 npx routex
+</code></pre>
+        <h3 id="cli-commands">CLI Commands</h3>
+        <ul>
+            <li>
+                <code>-d | --dir</code> to specify the directory to be used for
+                routes, defaults to <code>api</code>
+            </li>
+            <li>
+                <code>-p | --port</code> to specify the port to start the http
+                server on , defaults to <code>3000</code>
+            </li>
+        </ul>
+        <p>
+            Example, the following would use the <code>example</code> folder as
+            the base path for the routes and start the server on port
+            <code>3001</code>
+        </p>
+        <pre><code class="language-sh">  routex -d ./example -p 3001
 </code></pre>
     </body>
 </html>
