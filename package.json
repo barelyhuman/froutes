@@ -12,6 +12,7 @@
         "start": "node ./app.js -d ./example",
         "format": "prettier --write .",
         "create:doc": "node create-docs.js && git add docs/index.html",
+        "watch": "ncc build -w -o dist",
         "build": "ncc build app.js -o dist && git add .",
         "test:endpoints": "sleep 7 && node tests/endpoints.js",
         "test": "run-p dev test:*"
