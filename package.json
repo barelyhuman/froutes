@@ -7,7 +7,7 @@
         "routex": "dist/index.js"
     },
     "scripts": {
-        "dev": "nodemon --inspect ./app.js -p 3000 --dir ./example",
+        "dev": "nodemon --inspect ./dist/index.js -p 3000 --dir ./example",
         "dev:inspect": "nodemon --inspect-brk ./app.js -p 3000 --dir ./example",
         "start": "node ./app.js -d ./example",
         "format": "prettier --write .",
