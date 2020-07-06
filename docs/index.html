@@ -88,17 +88,26 @@ npm i -g barelyhuman/routex#canary --only=prod
 npm i barelyhuman/routex#canary --only=prod</code></pre>
         <h3 id="usage">Usage</h3>
         <p>
-            Any folder that routex is run in will be considered the API root and
-            will look for an <code>api</code> folder in the run location.
+            You can run <code>routex</code> in any folder and the
+            <code>.js</code> files will be considered as routes. The CLI
+            considers the <code>api</code> folder to be the root and will pass
+            down http <code>req,res</code> to the exported function.
         </p>
         <p>
             Then go ahead and create directories and files under any folder as
             mentioned or check the <code>examples</code> folder for reference.
         </p>
         <p>Example file tree:</p>
-        <pre><code>- api
-  - me.js // this compiles to &lt;host&gt;:&lt;port&gt;/api/me
-  - [id].js; // this compile to &lt;host&gt;:&lt;port&gt;/api/&lt;dynamicParameterId&gt;</code></pre>
+        <p>
+            We create a folder <code>example</code> you might want to call it
+            something like <code>routes</code> and point <code>routex</code> to
+            it using <code>-d ./routes</code> to give you an http Server running
+            for the files inside of the <code>routes</code> folder.
+        </p>
+        <pre><code>-example
+  - api
+    - me.js // this compiles to &lt;host&gt;:&lt;port&gt;/api/me
+    - [id].js; // this compile to &lt;host&gt;:&lt;port&gt;/api/&lt;dynamicParameterId&gt;</code></pre>
         <p>
             Example <code>me.js</code> that only handles
             <code>GET</code> requests:
@@ -130,9 +139,9 @@ npm i barelyhuman/routex#canary --only=prod</code></pre>
             using the <code>-d</code> or <code>--dir</code> command.
         </p>
         <pre><code class="language-sh"># If installed globally
-routex
+routex -d ./example
 # If installed locally
-npx routex
+npx routex -d ./example
 </code></pre>
         <h3 id="cli-commands">CLI Commands</h3>
         <ul>

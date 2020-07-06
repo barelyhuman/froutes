@@ -51,16 +51,20 @@ npm i barelyhuman/routex#canary --only=prod
 
 ### Usage
 
-Any folder that routex is run in will be considered the API root and will look for an `api` folder in the run location.
+You can run `routex` in any folder and the `.js` files will be considered as routes.
+The CLI considers the `api` folder to be the root and will pass down http `req,res` to the exported function.
 
 Then go ahead and create directories and files under any folder as mentioned or check the `examples` folder for reference.
 
 Example file tree:
 
+We create a folder `example` you might want to call it something like `routes` and point `routex` to it using `-d ./routes` to give you an http Server running for the files inside of the `routes` folder.
+
 ```
-- api
-  - me.js // this compiles to <host>:<port>/api/me
-  - [id].js; // this compile to <host>:<port>/api/<dynamicParameterId>
+-example
+  - api
+    - me.js // this compiles to <host>:<port>/api/me
+    - [id].js; // this compile to <host>:<port>/api/<dynamicParameterId>
 ```
 
 Example `me.js` that only handles `GET` requests:
@@ -98,9 +102,9 @@ Then run routex on the root folder of the project, this folder should contain th
 
 ```sh
 # If installed globally
-routex
+routex -d ./example
 # If installed locally
-npx routex
+npx routex -d ./example
 
 ```
 
