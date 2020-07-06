@@ -1,89 +1,55 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link
-            rel="stylesheet"
-            href="https://unpkg.com/sakura.css/css/sakura.css"
-            type="text/css"
-        />
-        <title>Routex | API's made easy</title>
-    </head>
 
-    <body>
-        <h1 id="routex">Routex</h1>
-        <p>
-            A minimal file tree based api router for building rest api&#39;s
-            with node.
-        </p>
-        <h3 id="about">About</h3>
-        <p>
-            RouteX started as a clone of the Next.js&#39; Api Routes
-            implmentation and is now on it&#39;s path to compete with other
-            frameworks as the simplest way to setup API routes. There&#39;s been
-            numerous posts on why using the folder tree makes it atomic and
-            easier to handle the separation between logic. While you cannot
-            bundle code with routex since each file is independent of the other
-            and doesn&#39;t need the others for its execution.
-        </p>
-        <p>
-            The Idea and Inspiration for the creation remains to be Vercel&#39;s
-            Next.js
-        </p>
-        <h3 id="changes-6jul2020">Changes (6/Jul/2020)</h3>
-        <ul>
-            <li>
-                Removed the <code>.route</code> folder for storing the compiled
-                routes
-            </li>
-            <li>
-                Root Folder routes are now accessible, you don&#39;t need to
-                specifically use an <code>api</code> folder anymore, you can use
-                any folder and the cli will consider it a route.
-            </li>
-        </ul>
-        <h3 id="warning">Warning</h3>
-        <p>
-            This library is still in active development and is bound to have
-            bugs , kindly make sure you use it only for testing and not for
-            production as of now.
-        </p>
-        <h3 id="current-limitations">Current Limitations</h3>
-        <ul>
-            <li>
-                A very limited cli, no hot reload, no file watcher, it literally
-                just runs a simple processor for reading the file system as of
-                now.
-            </li>
-        </ul>
-        <h3 id="installation">Installation</h3>
-        <h4 id="stable-cli">Stable Cli</h4>
-        <pre><code class="language-sh"># for global install to avoid installing the devDependencies
+        <!DOCTYPE html>
+        <html lang="en">
+            <head>
+                <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <link
+                    rel="stylesheet"
+                    href="https://unpkg.com/sakura.css/css/sakura.css"
+                    type="text/css"
+                />
+                <title>Routex | API's made easy</title>
+            </head>
+        
+            <body>
+              <h1 id="routex">Routex</h1>
+<p>A minimal file tree based api router for building rest api&#39;s with node.</p>
+<h3 id="about">About</h3>
+<p>RouteX started as a clone of the Next.js&#39; Api Routes implmentation and is now on it&#39;s path to compete with other frameworks as the simplest way to setup API routes. There&#39;s been numerous posts on why using the folder tree makes it atomic and easier to handle the separation between logic. While you cannot bundle code with routex since each file is independent of the other and doesn&#39;t need the others for its execution.</p>
+<p>The Idea and Inspiration for the creation remains to be Vercel&#39;s Next.js</p>
+<h3 id="changes-6jul2020">Changes (6/Jul/2020)</h3>
+<ul>
+<li>Removed the <code>.route</code> folder for storing the compiled routes</li>
+<li>Root Folder routes are now accessible, you don&#39;t need to specifically use an <code>api</code> folder anymore, you can use any folder and the cli will consider it a route.</li>
+</ul>
+<h3 id="warning">Warning</h3>
+<p>This library is still in active development and is bound to have bugs , kindly make sure you use it only for testing and not for production as of now.</p>
+<h3 id="current-limitations">Current Limitations</h3>
+<ul>
+<li>A very limited cli, no hot reload, no file watcher, it literally just runs a simple processor for reading the file system as of now.</li>
+</ul>
+<h3 id="installation">Installation</h3>
+<h4 id="stable-cli">Stable Cli</h4>
+<pre><code class="language-sh"># for global install to avoid installing the devDependencies
 npm i -g barelyhuman/routex --only=prod
 # for local install to avoid installing the devDependencies
 npm i barelyhuman/routex --only=prod
 </code></pre>
-        <h4 id="canary-cli">Canary Cli</h4>
-        <pre><code class="language-sh"># for global install to avoid installing the devDependencies
+<h4 id="canary-cli">Canary Cli</h4>
+<pre><code class="language-sh"># for global install to avoid installing the devDependencies
 npm i -g barelyhuman/routex#canary --only=prod
 # for local install to avoid installing the devDependencies
 npm i barelyhuman/routex#canary --only=prod</code></pre>
-        <h3 id="usage">Usage</h3>
-        <p>Any folder that routex is run in will be considered the API root.</p>
-        <p>
-            Then go ahead and create directories and files under any folder as
-            mentioned or check the <code>examples</code> folder for reference.
-        </p>
-        <p>Example file tree:</p>
-        <pre><code>- api
+<h3 id="usage">Usage</h3>
+<p>Any folder that routex is run in will be considered the API root.</p>
+<p>Then go ahead and create directories and files under any folder as mentioned or check the <code>examples</code> folder for reference.</p>
+<p>Example file tree:</p>
+<pre><code>- api
   - me.js // this compiles to &lt;host&gt;:&lt;port&gt;/api/me
   - [id].js; // this compile to &lt;host&gt;:&lt;port&gt;/api/&lt;dynamicParameterId&gt;</code></pre>
-        <p>
-            Example <code>me.js</code> that only handles
-            <code>GET</code> requests:
-        </p>
-        <pre><code>module.exports = (req, res) =&gt; {
+<p>Example <code>me.js</code> that only handles <code>GET</code> requests:</p>
+<pre><code>module.exports = (req, res) =&gt; {
   if(req.method === &#39;GET&#39;){
     res.writeHead(200, { &#39;Content-Type&#39;: &#39;text/plain&#39; });
     res.write(&#39;Hello World!&#39;);
@@ -97,21 +63,20 @@ npm i barelyhuman/routex#canary --only=prod</code></pre>
 };
 
 </code></pre>
-        <p>Example <code>[id].js</code> that handles the dynamic path param:</p>
-        <p><code>GET|POST|DELETE /api/1</code></p>
-        <pre><code>module.exports = (req, res) =&gt; {
+<p>Example <code>[id].js</code> that handles the dynamic path param:</p>
+<p><code>GET|POST|DELETE /api/1</code></p>
+<pre><code>module.exports = (req, res) =&gt; {
     res.write(&#39;path param &#39; + JSON.stringify(req.params)) // {&quot;id&quot;:1};
     res.end();
 };
 </code></pre>
-        <p>
-            Then run routex on the root folder of the project, this folder
-            should contain the <code>api</code> folder
-        </p>
-        <pre><code class="language-sh"># If installed globally
+<p>Then run routex on the root folder of the project, this folder should contain the <code>api</code> folder</p>
+<pre><code class="language-sh"># If installed globally
 routex
 # If installed locally
 npx routex
 </code></pre>
-    </body>
-</html>
+
+            </body>
+        </html>    
+        

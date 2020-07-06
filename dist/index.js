@@ -630,11 +630,9 @@ async function processDirectory(currPath, dir, pointer) {
                     })
                 const paramRegex = /^\[(\w+)\]$/
                 if (paramRegex.test(dir)) {
-                    debugger
                     const matchingParams = dir.match(paramRegex)
                     const param = matchingParams[1]
                     pointer[dir].params = [param]
-                    debugger
                 }
 
                 if (nextFile.isDirectory()) {
@@ -5793,9 +5791,9 @@ setupRoutes()
 /***/ 973:
 /***/ (function(module) {
 
+const basePath = process.cwd()
 module.exports = () => {
-    const currPath = `${process.cwd()}`
-    return currPath
+    return basePath
 }
 
 

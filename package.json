@@ -7,7 +7,7 @@
         "routex": "dist/index.js"
     },
     "scripts": {
-        "dev": "cd example && nodemon ../app.js",
+        "dev": "cd example && nodemon --inspect ../app.js",
         "dev:inspect": "cd example && nodemon --inspect-brk ../app.js",
         "start": "cd example && node ../app.js",
         "format": "prettier --write .",
