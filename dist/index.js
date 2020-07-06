@@ -149,18 +149,6 @@ module.exports = require("readline");
 
 /***/ }),
 
-/***/ 66:
-/***/ (function(module) {
-
-module.exports = (dirs) => {
-    const exists = dirs.find((item) => item === 'api')
-    const valid = exists ? true : false
-    return { valid, path: exists }
-}
-
-
-/***/ }),
-
 /***/ 87:
 /***/ (function(module) {
 
@@ -400,26 +388,12 @@ module.exports = async () => {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const basePath = __webpack_require__(973)
-const fs = __webpack_require__(747).promises
 const path = __webpack_require__(622)
-const checkApiDir = __webpack_require__(66)
 const processDirectories = __webpack_require__(239)
 
 module.exports = () => {
-    return fs
-        .readdir(basePath())
-        .then((dirs) => {
-            // const apiDirExists = checkApiDir(dirs);
-            // if (!apiDirExists.valid) {
-            //     throw new Error('cannot find an `api` directory');
-            // }
-            const processingPath = path.join(basePath())
-            return processDirectories(processingPath)
-        })
-        .catch((err) => {
-            console.error(err)
-            throw err
-        })
+    const processingPath = path.join(basePath())
+    return processDirectories(processingPath)
 }
 
 
