@@ -67,10 +67,6 @@ module.exports = async (availableRoutes, req, res) => {
         let handlerPath = ''
         let currentPointer = availableRoutes['.']
 
-        // Attach Helpers
-        res.send = send(res)
-        res.status = status(res)
-
         for (let i = 0; i < parsedRouteUrl.paths.length; i += 1) {
             const item = parsedRouteUrl.paths[i]
             let matchingKey
@@ -127,12 +123,15 @@ module.exports = async (availableRoutes, req, res) => {
 
         let _handlerPath = path.join(basePath(), handlerPath)
 
+        // Attach helpers and parsed query data
+        res.send = send(res)
+        res.status = status(res)
         req.query = parsedRouteUrl.query
 
         return require(_handlerPath)(req, res)
     } catch (err) {
         console.error(err)
-        res.statusCode(500)
+        res.status(500)
         res.end()
         throw err
     }

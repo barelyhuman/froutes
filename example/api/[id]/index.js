@@ -1,10 +1,7 @@
 module.exports = (req, res) => {
     if (req.method === 'GET') {
-        res.write('Dynamic folder route')
-        res.end()
-        return
+        return res.send('Dynamic folder route')
     }
-    res.statusCode = 404
-    res.end()
-    return
+    res.status(404)
+    return res.end()
 }
