@@ -780,12 +780,16 @@ module.exports = function (str) {
 
 const fs = __webpack_require__(747).promises
 const path = __webpack_require__(622)
+const basePath = __webpack_require__(973)
+
+let mainRouterTree = {}
 
 module.exports = async (directory) => {
     try {
         const routeTree = {}
         let currentPointer = routeTree
         await processDirectory(directory, '.', currentPointer)
+        console.log({ mainRouterTree: JSON.stringify(mainRouterTree) })
         return routeTree
     } catch (err) {
         console.error(err)
@@ -833,6 +837,9 @@ async function processDirectory(currPath, dir, pointer) {
 }
 
 function processFile(file, pointer, filePath) {
+    const _basePath = basePath()
+    const ignoredPath = filePath.replace(_basePath, '')
+
     const paramRegex = /^\[(\w+)\].js$/
     if (paramRegex.test(file)) {
         const matchingParams = file.match(paramRegex)
@@ -843,16 +850,19 @@ function processFile(file, pointer, filePath) {
             params: [param],
             index: require(`${filePath}/${file}`),
         }
+        mainRouterTree[`${ignoredPath}/${noExt}`] = file
         pointer[noExt] = valuesInsertion
     } else if (file === 'index.js') {
         pointer.type = 'dir'
         pointer.index = require(`${filePath}/index.js`)
+        mainRouterTree[`${ignoredPath}`] = 'index.js'
     } else {
         const noExt = file.replace('.js', '')
         const valuesInsertion = {
             type: 'file',
             index: require(`${filePath}/${file}`),
         }
+        mainRouterTree[`${ignoredPath}/${noExt}`] = file
         pointer[noExt] = valuesInsertion
     }
 }
