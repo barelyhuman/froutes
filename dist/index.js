@@ -55,8 +55,6 @@ module.exports =
 /***/ 22:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const basePath = __webpack_require__(973)
-const path = __webpack_require__(622)
 const parseUrl = __webpack_require__(304)
 const { send, status } = __webpack_require__(876)
 
@@ -66,6 +64,10 @@ module.exports = async (availableRoutes, req, res) => {
 
         let handlerPath = ''
         let currentPointer = availableRoutes['.']
+
+        res.send = send(res)
+        res.status = status(res)
+        req.query = parsedRouteUrl.query
 
         for (let i = 0; i < parsedRouteUrl.paths.length; i += 1) {
             const item = parsedRouteUrl.paths[i]
@@ -117,22 +119,14 @@ module.exports = async (availableRoutes, req, res) => {
 
         if (currentPointer.type === 'dir') {
             if (currentPointer.index) {
-                handlerPath += currentPointer.index
+                return currentPointer.index(req, res)
             } else {
                 res.statusCode = 404
-                res.end()
-                return
+                return res.end()
             }
+        } else {
+            return currentPointer.index(req, res)
         }
-
-        let _handlerPath = path.join(basePath(), handlerPath)
-
-        // Attach helpers and parsed query data
-        res.send = send(res)
-        res.status = status(res)
-        req.query = parsedRouteUrl.query
-
-        return require(_handlerPath)(req, res)
     } catch (err) {
         console.error(err)
         res.status(500)
@@ -823,14 +817,14 @@ async function processDirectory(currPath, dir, pointer) {
                 if (nextFile.isDirectory()) {
                     await processDirectory(pathToCheck, fileRecord, nextPointer)
                 } else if (nextFile.isFile()) {
-                    processFile(fileRecord, nextPointer)
+                    processFile(fileRecord, nextPointer, pathToCheck)
                 }
                 return Promise.resolve()
             })
 
             await Promise.all(treeMods)
         } else if (pathStat.isFile()) {
-            processFile(dir, pointer)
+            processFile(dir, pointer, currPath)
         }
     } catch (err) {
         console.error(err)
@@ -838,7 +832,7 @@ async function processDirectory(currPath, dir, pointer) {
     }
 }
 
-function processFile(file, pointer) {
+function processFile(file, pointer, filePath) {
     const paramRegex = /^\[(\w+)\].js$/
     if (paramRegex.test(file)) {
         const matchingParams = file.match(paramRegex)
@@ -847,17 +841,17 @@ function processFile(file, pointer) {
         const valuesInsertion = {
             type: 'file',
             params: [param],
-            index: file,
+            index: require(`${filePath}/${file}`),
         }
         pointer[noExt] = valuesInsertion
     } else if (file === 'index.js') {
         pointer.type = 'dir'
-        pointer.index = 'index.js'
+        pointer.index = require(`${filePath}/index.js`)
     } else {
         const noExt = file.replace('.js', '')
         const valuesInsertion = {
             type: 'file',
-            index: file,
+            index: require(`${filePath}/${file}`),
         }
         pointer[noExt] = valuesInsertion
     }
