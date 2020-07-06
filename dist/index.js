@@ -340,49 +340,6 @@ if ( true && module.exports) {
 
 /***/ }),
 
-/***/ 104:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const basePath = __webpack_require__(973)
-const fs = __webpack_require__(747)
-const path = __webpack_require__(622)
-
-module.exports = async () => {
-    try {
-        const creationPath = path.join(basePath(), '.route')
-        const exists = await new Promise((resolve, reject) => {
-            fs.stat(creationPath, (err, stat) => {
-                if (
-                    (err && err.code === 'ENOENT') ||
-                    (err && err.code === 'ENOTDIR')
-                ) {
-                    resolve(false)
-                }
-                return resolve(true)
-            })
-        })
-
-        if (exists) {
-            return creationPath
-        } else {
-            await new Promise((resolve, reject) => {
-                fs.mkdir(creationPath, (err, done) => {
-                    if (err) reject(err)
-                    resolve(done)
-                })
-            })
-        }
-
-        return creationPath
-    } catch (err) {
-        console.error(err)
-        throw err
-    }
-}
-
-
-/***/ }),
-
 /***/ 109:
 /***/ (function(module) {
 
@@ -933,9 +890,6 @@ module.exports = require("querystring");
 /***/ 239:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const fs = __webpack_require__(747)
-const path = __webpack_require__(622)
-const createRouteDir = __webpack_require__(104)
 const createAvailableRoutes = __webpack_require__(168)
 const ora = __webpack_require__(937)
 
