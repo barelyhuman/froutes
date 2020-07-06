@@ -6021,11 +6021,14 @@ setupRoutes()
 const path = __webpack_require__(622)
 const argv = __webpack_require__(109)(process.argv.slice(2))
 
-const dir = argv.d || argv.dir || 'api'
-const basePath = path.join(process.cwd(), dir)
+let _basePath
 
 module.exports = () => {
-    return basePath
+    if (!_basePath) {
+        const dir = argv.d || argv.dir || 'api'
+        _basePath = path.join(process.cwd(), dir)
+    }
+    return _basePath
 }
 
 
