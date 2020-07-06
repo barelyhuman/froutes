@@ -19,3 +19,8 @@ setupRoutes()
         console.log(err)
         throw err
     })
+
+process.on('uncaughtException', (err) => {
+    console.error(err)
+    throw err
+})

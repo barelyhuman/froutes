@@ -71,11 +71,15 @@ module.exports = async (availableRoutes, req, res) => {
             const item = parsedRouteUrl.paths[i]
             let matchingKey
             if (!currentPointer[item]) {
-                matchingKey = Object.keys(currentPointer).find(
-                    (key) =>
-                        currentPointer[key].params &&
-                        currentPointer[key].params.length > 0
-                )
+                for (let k in currentPointer) {
+                    if (
+                        currentPointer[k].params &&
+                        currentPointer[k].params.length > 0
+                    ) {
+                        matchingKey = k
+                        break
+                    }
+                }
 
                 if (matchingKey) {
                     currentPointer = currentPointer[matchingKey]
@@ -1372,13 +1376,21 @@ const querystring = __webpack_require__(191)
 
 module.exports = (urlstring) => {
     const _url = url.parse(urlstring)
-    const paths = _url.pathname.split('/').filter((item) => item)
+    const paths = _url.pathname.split('/')
+    let _paths = []
+
+    for (let i = 0; i < paths.length; i += 1) {
+        if (paths[i]) {
+            _paths.push(paths[i])
+        }
+    }
+
     let queryParams = {}
     if (_url.search && _url.search.length > 0) {
         queryParams = querystring.parse(_url.search.replace('?', ''))
     }
     return {
-        paths,
+        paths: _paths,
         query: queryParams,
     }
 }
@@ -4991,7 +5003,6 @@ exports.send = (res) => {
             _body = JSON.stringify(_body)
             setContentType(res, 'json')
         }
-
         res.write(_body)
         res.end()
         return
@@ -5964,6 +5975,11 @@ setupRoutes()
         console.log(err)
         throw err
     })
+
+process.on('uncaughtException', (err) => {
+    console.error(err)
+    throw err
+})
 
 
 /***/ }),
