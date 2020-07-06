@@ -7,9 +7,9 @@
         "routex": "dist/index.js"
     },
     "scripts": {
-        "dev": "cd example && nodemon --inspect ../app.js",
-        "dev:inspect": "cd example && nodemon --inspect-brk ../app.js",
-        "start": "cd example && node ../app.js",
+        "dev": "nodemon --inspect ./app.js -p 3000 --dir ./example",
+        "dev:inspect": "nodemon --inspect-brk ./app.js -p 3000 --dir ./example",
+        "start": "node ./app.js -d ./example",
         "format": "prettier --write .",
         "create:doc": "node create-docs.js && git add docs/index.html",
         "build": "ncc build app.js -o dist && git add .",
@@ -26,17 +26,17 @@
         "url": "https://github.com/barelyhuman/routex/issues"
     },
     "homepage": "https://github.com/barelyhuman/routex#readme",
-    "dependencies": {
-        "ora": "^4.0.4"
-    },
+    "dependencies": {},
     "devDependencies": {
         "@zeit/ncc": "^0.22.3",
-        "npm-run-all": "^4.1.5",
         "axios": "^0.19.2",
         "husky": ">=4",
         "lint-staged": ">=10",
         "marked": "^1.1.0",
-        "prettier": "^2.0.5"
+        "npm-run-all": "^4.1.5",
+        "prettier": "^2.0.5",
+        "minimist": "^1.2.5",
+        "ora": "^4.0.4"
     },
     "husky": {
         "hooks": {
