@@ -749,9 +749,7 @@ let mainRouterTree = {}
 
 module.exports = async (directory) => {
     try {
-        const routeTree = {}
-        let currentPointer = routeTree
-        await processDirectory(directory, '.', currentPointer)
+        await processDirectory(directory, '.')
         return mainRouterTree
     } catch (err) {
         console.error(err)
@@ -759,7 +757,7 @@ module.exports = async (directory) => {
     }
 }
 
-async function processDirectory(currPath, dir, pointer) {
+async function processDirectory(currPath, dir) {
     try {
         const pathToCheck = path.join(currPath, dir)
         const pathStat = await fs.stat(pathToCheck)
@@ -771,30 +769,18 @@ async function processDirectory(currPath, dir, pointer) {
                 }
                 const nextPathToCheck = path.join(pathToCheck, fileRecord)
                 const nextFile = await fs.stat(nextPathToCheck)
-                const nextPointer =
-                    pointer[dir] ||
-                    (pointer[dir] = {
-                        type: 'dir',
-                    })
-
-                const paramRegex = /^\[(\w+)\]$/
-                if (paramRegex.test(dir)) {
-                    const matchingParams = dir.match(paramRegex)
-                    const param = matchingParams[1]
-                    pointer[dir].params = [param]
-                }
 
                 if (nextFile.isDirectory()) {
-                    await processDirectory(pathToCheck, fileRecord, nextPointer)
+                    await processDirectory(pathToCheck, fileRecord)
                 } else if (nextFile.isFile()) {
-                    processFile(fileRecord, nextPointer, pathToCheck)
+                    processFile(fileRecord, pathToCheck)
                 }
                 return Promise.resolve()
             })
 
             await Promise.all(treeMods)
         } else if (pathStat.isFile() && dir !== '.DS_Store') {
-            processFile(dir, pointer, currPath)
+            processFile(dir, currPath)
         }
     } catch (err) {
         console.error(err)
@@ -802,28 +788,18 @@ async function processDirectory(currPath, dir, pointer) {
     }
 }
 
-function processFile(file, pointer, filePath) {
+function processFile(file, filePath) {
     const _basePath = basePath()
     const ignoredPath = filePath.replace(_basePath, '')
 
     const paramRegex = /^\[(\w+)\].js$/
     if (paramRegex.test(file)) {
-        const matchingParams = file.match(paramRegex)
-        const param = matchingParams[1]
         const noExt = file.replace('.js', '')
-        const valuesInsertion = {
-            type: 'file',
-            params: [param],
-            index: require(`${filePath}/${file}`),
-        }
         mainRouterTree[`${ignoredPath}/${noExt}`] = {
             handler: require(`${filePath}/${file}`),
             parser: createRouteParser(`${ignoredPath}/${noExt}`),
         }
-        pointer[noExt] = valuesInsertion
     } else if (file === 'index.js') {
-        pointer.type = 'dir'
-        pointer.index = require(`${filePath}/index.js`)
         if (!ignoredPath) {
             mainRouterTree[`/`] = {
                 handler: require(`${filePath}/index.js`),
@@ -837,15 +813,10 @@ function processFile(file, pointer, filePath) {
         }
     } else {
         const noExt = file.replace('.js', '')
-        const valuesInsertion = {
-            type: 'file',
-            index: require(`${filePath}/${file}`),
-        }
         mainRouterTree[`${ignoredPath}/${noExt}`] = {
             handler: require(`${filePath}/${file}`),
             parser: createRouteParser(`${ignoredPath}/${noExt}`),
         }
-        pointer[noExt] = valuesInsertion
     }
 }
 
