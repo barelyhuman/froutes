@@ -752,7 +752,6 @@ module.exports = async (directory) => {
         const routeTree = {}
         let currentPointer = routeTree
         await processDirectory(directory, '.', currentPointer)
-        console.log({ mainRouterTree: JSON.stringify(mainRouterTree) })
         return mainRouterTree
     } catch (err) {
         console.error(err)
@@ -764,9 +763,12 @@ async function processDirectory(currPath, dir, pointer) {
     try {
         const pathToCheck = path.join(currPath, dir)
         const pathStat = await fs.stat(pathToCheck)
-        if (pathStat.isDirectory()) {
+        if (pathStat.isDirectory() && dir !== '.DS_Store') {
             const dirContent = await fs.readdir(pathToCheck)
             const treeMods = dirContent.map(async (fileRecord) => {
+                if (fileRecord === '.DS_Store') {
+                    return
+                }
                 const nextPathToCheck = path.join(pathToCheck, fileRecord)
                 const nextFile = await fs.stat(nextPathToCheck)
                 const nextPointer =
@@ -791,7 +793,7 @@ async function processDirectory(currPath, dir, pointer) {
             })
 
             await Promise.all(treeMods)
-        } else if (pathStat.isFile()) {
+        } else if (pathStat.isFile() && dir !== '.DS_Store') {
             processFile(dir, pointer, currPath)
         }
     } catch (err) {
@@ -4971,7 +4973,6 @@ function isDynamicRoute(route) {
         getParam: (url) => {
             const group = url.match(parser).slice(1)
 
-            console.log({ matchGroups, group })
             const params = {}
 
             matchGroups.forEach((item, index) => {
