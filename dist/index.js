@@ -61,71 +61,33 @@ const { send, status } = __webpack_require__(876)
 module.exports = async (availableRoutes, req, res) => {
     try {
         const parsedRouteUrl = parseUrl(req.url)
-
-        let handlerPath = ''
-        let currentPointer = availableRoutes['.']
-
         res.send = send(res)
         res.status = status(res)
         req.query = parsedRouteUrl.query
 
-        for (let i = 0; i < parsedRouteUrl.paths.length; i += 1) {
-            const item = parsedRouteUrl.paths[i]
-            let matchingKey
-            if (!currentPointer[item]) {
-                for (let k in currentPointer) {
-                    if (
-                        currentPointer[k].params &&
-                        currentPointer[k].params.length > 0
-                    ) {
-                        matchingKey = k
-                        break
-                    }
-                }
+        let pathName = parsedRouteUrl.url.pathname
 
-                if (matchingKey) {
-                    currentPointer = currentPointer[matchingKey]
-                    const key = matchingKey.replace(/[\[\]]/g, '')
-                    req.params = {
-                        ...req.params,
-                        [key]: item,
-                    }
-                } else {
-                    currentPointer = null
-                    break
-                }
-            } else {
-                currentPointer = currentPointer[item]
-            }
+        if (pathName[pathName.length - 1] === '/') {
+            pathName = pathName.slice(0, pathName.length - 1)
+        }
 
-            if (currentPointer) {
-                if (currentPointer.type === 'file') {
-                    handlerPath += currentPointer.index
-                } else {
-                    if (matchingKey) {
-                        handlerPath += matchingKey + '/'
-                    } else {
-                        handlerPath += item + '/'
-                    }
-                }
+        if (availableRoutes.hasOwnProperty(pathName)) {
+            return availableRoutes[pathName].handler(req, res)
+        }
+
+        let match = false
+        for (let k in availableRoutes) {
+            if (availableRoutes[k].parser.parse.test(pathName)) {
+                match = true
+                req.params = availableRoutes[k].parser.getParam(pathName)
+                availableRoutes[k].handler(req, res)
+                break
             }
         }
 
-        if (!currentPointer || !currentPointer.type) {
-            res.statusCode = 404
-            res.end()
-            return
-        }
-
-        if (currentPointer.type === 'dir') {
-            if (currentPointer.index) {
-                return currentPointer.index(req, res)
-            } else {
-                res.statusCode = 404
-                return res.end()
-            }
-        } else {
-            return currentPointer.index(req, res)
+        if (!match) {
+            res.status(404)
+            return res.end()
         }
     } catch (err) {
         console.error(err)
@@ -781,6 +743,7 @@ module.exports = function (str) {
 const fs = __webpack_require__(747).promises
 const path = __webpack_require__(622)
 const basePath = __webpack_require__(973)
+const { createRouteParser } = __webpack_require__(854)
 
 let mainRouterTree = {}
 
@@ -790,7 +753,7 @@ module.exports = async (directory) => {
         let currentPointer = routeTree
         await processDirectory(directory, '.', currentPointer)
         console.log({ mainRouterTree: JSON.stringify(mainRouterTree) })
-        return routeTree
+        return mainRouterTree
     } catch (err) {
         console.error(err)
         throw err
@@ -811,6 +774,7 @@ async function processDirectory(currPath, dir, pointer) {
                     (pointer[dir] = {
                         type: 'dir',
                     })
+
                 const paramRegex = /^\[(\w+)\]$/
                 if (paramRegex.test(dir)) {
                     const matchingParams = dir.match(paramRegex)
@@ -850,19 +814,35 @@ function processFile(file, pointer, filePath) {
             params: [param],
             index: require(`${filePath}/${file}`),
         }
-        mainRouterTree[`${ignoredPath}/${noExt}`] = file
+        mainRouterTree[`${ignoredPath}/${noExt}`] = {
+            handler: require(`${filePath}/${file}`),
+            parser: createRouteParser(`${ignoredPath}/${noExt}`),
+        }
         pointer[noExt] = valuesInsertion
     } else if (file === 'index.js') {
         pointer.type = 'dir'
         pointer.index = require(`${filePath}/index.js`)
-        mainRouterTree[`${ignoredPath}`] = 'index.js'
+        if (!ignoredPath) {
+            mainRouterTree[`/`] = {
+                handler: require(`${filePath}/index.js`),
+                parser: createRouteParser(`${ignoredPath}`),
+            }
+        } else {
+            mainRouterTree[`${ignoredPath}`] = {
+                handler: require(`${filePath}/index.js`),
+                parser: createRouteParser(`${ignoredPath}`),
+            }
+        }
     } else {
         const noExt = file.replace('.js', '')
         const valuesInsertion = {
             type: 'file',
             index: require(`${filePath}/${file}`),
         }
-        mainRouterTree[`${ignoredPath}/${noExt}`] = file
+        mainRouterTree[`${ignoredPath}/${noExt}`] = {
+            handler: require(`${filePath}/${file}`),
+            parser: createRouteParser(`${ignoredPath}/${noExt}`),
+        }
         pointer[noExt] = valuesInsertion
     }
 }
@@ -1394,6 +1374,7 @@ module.exports = (urlstring) => {
         queryParams = querystring.parse(_url.search.replace('?', ''))
     }
     return {
+        url: _url,
         paths: _paths,
         query: queryParams,
     }
@@ -4964,6 +4945,46 @@ chalk.Level = {
 };
 
 module.exports = chalk;
+
+
+/***/ }),
+
+/***/ 854:
+/***/ (function(__unusedmodule, exports) {
+
+function createRouteParser(routeString) {
+    return isDynamicRoute(routeString)
+}
+
+function isDynamicRoute(route) {
+    let routeString = route
+    const dynRegex = /(\[\w+\])/g
+    const matchGroups = route.match(dynRegex) || []
+    matchGroups.forEach((groupItem) => {
+        routeString = routeString.replace(groupItem, '(\\w+)')
+    })
+    routeString = routeString.replace(/\//g, '\\/')
+    const parser = RegExp(`^${routeString}$`)
+    return {
+        dynamic: dynRegex.test(route),
+        parse: parser,
+        getParam: (url) => {
+            const group = url.match(parser).slice(1)
+
+            console.log({ matchGroups, group })
+            const params = {}
+
+            matchGroups.forEach((item, index) => {
+                const key = item.replace(/[\[\]]/g, '')
+                params[key] = group[index]
+            })
+
+            return params
+        },
+    }
+}
+
+exports.createRouteParser = createRouteParser
 
 
 /***/ }),

@@ -1,4 +1,3 @@
 module.exports = (req, res) => {
-    res.write(JSON.stringify(req.params))
-    res.end()
+    return res.send(req.params)
 }
