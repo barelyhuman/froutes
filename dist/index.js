@@ -803,9 +803,12 @@ async function processDirectory(currPath, dir, pointer) {
     try {
         const pathToCheck = path.join(currPath, dir)
         const pathStat = await fs.stat(pathToCheck)
-        if (pathStat.isDirectory()) {
+        if (pathStat.isDirectory() && dir !== '.DS_Store') {
             const dirContent = await fs.readdir(pathToCheck)
             const treeMods = dirContent.map(async (fileRecord) => {
+                if (fileRecord === '.DS_Store') {
+                    return
+                }
                 const nextPathToCheck = path.join(pathToCheck, fileRecord)
                 const nextFile = await fs.stat(nextPathToCheck)
                 const nextPointer =
