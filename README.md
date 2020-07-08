@@ -1,5 +1,5 @@
 <p align="center">
-		<img width="125" src="https://raw.githubusercontent.com/barelyhuman/routex/canary/docs/logo.svg">
+		<img width="125" src="docs/logo-gradient.svg">
 </p>
 <h1 align="center">Routex</h1>
 <p align="center">A minimal file tree based api router for building rest api's with node</p>
