@@ -55,84 +55,40 @@ module.exports =
 /***/ 22:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const basePath = __webpack_require__(973)
-const path = __webpack_require__(622)
 const parseUrl = __webpack_require__(304)
 const { send, status } = __webpack_require__(876)
 
 module.exports = async (availableRoutes, req, res) => {
     try {
         const parsedRouteUrl = parseUrl(req.url)
-
-        let handlerPath = ''
-        let currentPointer = availableRoutes['.']
-
-        for (let i = 0; i < parsedRouteUrl.paths.length; i += 1) {
-            const item = parsedRouteUrl.paths[i]
-            let matchingKey
-            if (!currentPointer[item]) {
-                for (let k in currentPointer) {
-                    if (
-                        currentPointer[k].params &&
-                        currentPointer[k].params.length > 0
-                    ) {
-                        matchingKey = k
-                        break
-                    }
-                }
-
-                if (matchingKey) {
-                    currentPointer = currentPointer[matchingKey]
-                    const key = matchingKey.replace(/[\[\]]/g, '')
-                    req.params = {
-                        ...req.params,
-                        [key]: item,
-                    }
-                } else {
-                    currentPointer = null
-                    break
-                }
-            } else {
-                currentPointer = currentPointer[item]
-            }
-
-            if (currentPointer) {
-                if (currentPointer.type === 'file') {
-                    handlerPath += currentPointer.index
-                } else {
-                    if (matchingKey) {
-                        handlerPath += matchingKey + '/'
-                    } else {
-                        handlerPath += item + '/'
-                    }
-                }
-            }
-        }
-
-        if (!currentPointer || !currentPointer.type) {
-            res.statusCode = 404
-            res.end()
-            return
-        }
-
-        if (currentPointer.type === 'dir') {
-            if (currentPointer.index) {
-                handlerPath += currentPointer.index
-            } else {
-                res.statusCode = 404
-                res.end()
-                return
-            }
-        }
-
-        let _handlerPath = path.join(basePath(), handlerPath)
-
-        // Attach helpers and parsed query data
         res.send = send(res)
         res.status = status(res)
         req.query = parsedRouteUrl.query
 
-        return require(_handlerPath)(req, res)
+        let pathName = parsedRouteUrl.url.pathname
+
+        if (pathName[pathName.length - 1] === '/') {
+            pathName = pathName.slice(0, pathName.length - 1)
+        }
+
+        if (availableRoutes.hasOwnProperty(pathName)) {
+            return availableRoutes[pathName].handler(req, res)
+        }
+
+        let match = false
+        for (let k in availableRoutes) {
+            if (availableRoutes[k].parser.parse.test(pathName)) {
+                match = true
+                req.params = availableRoutes[k].parser.getParam(pathName)
+                availableRoutes[k].handler(req, res)
+                break
+            }
+        }
+
+        if (!match) {
+            res.status(404)
+            return res.end()
+        }
     } catch (err) {
         console.error(err)
         res.status(500)
@@ -786,51 +742,45 @@ module.exports = function (str) {
 
 const fs = __webpack_require__(747).promises
 const path = __webpack_require__(622)
+const basePath = __webpack_require__(973)
+const { createRouteParser } = __webpack_require__(854)
+
+let mainRouterTree = {}
 
 module.exports = async (directory) => {
     try {
-        const routeTree = {}
-        let currentPointer = routeTree
-        await processDirectory(directory, '.', currentPointer)
-        return routeTree
+        await processDirectory(directory, '.')
+        return mainRouterTree
     } catch (err) {
         console.error(err)
         throw err
     }
 }
 
-async function processDirectory(currPath, dir, pointer) {
+async function processDirectory(currPath, dir) {
     try {
         const pathToCheck = path.join(currPath, dir)
         const pathStat = await fs.stat(pathToCheck)
-        if (pathStat.isDirectory()) {
+        if (pathStat.isDirectory() && dir !== '.DS_Store') {
             const dirContent = await fs.readdir(pathToCheck)
             const treeMods = dirContent.map(async (fileRecord) => {
+                if (fileRecord === '.DS_Store') {
+                    return
+                }
                 const nextPathToCheck = path.join(pathToCheck, fileRecord)
                 const nextFile = await fs.stat(nextPathToCheck)
-                const nextPointer =
-                    pointer[dir] ||
-                    (pointer[dir] = {
-                        type: 'dir',
-                    })
-                const paramRegex = /^\[(\w+)\]$/
-                if (paramRegex.test(dir)) {
-                    const matchingParams = dir.match(paramRegex)
-                    const param = matchingParams[1]
-                    pointer[dir].params = [param]
-                }
 
                 if (nextFile.isDirectory()) {
-                    await processDirectory(pathToCheck, fileRecord, nextPointer)
+                    await processDirectory(pathToCheck, fileRecord)
                 } else if (nextFile.isFile()) {
-                    processFile(fileRecord, nextPointer)
+                    processFile(fileRecord, pathToCheck)
                 }
                 return Promise.resolve()
             })
 
             await Promise.all(treeMods)
-        } else if (pathStat.isFile()) {
-            processFile(dir, pointer)
+        } else if (pathStat.isFile() && dir !== '.DS_Store') {
+            processFile(dir, currPath)
         }
     } catch (err) {
         console.error(err)
@@ -838,28 +788,35 @@ async function processDirectory(currPath, dir, pointer) {
     }
 }
 
-function processFile(file, pointer) {
+function processFile(file, filePath) {
+    const _basePath = basePath()
+    const ignoredPath = filePath.replace(_basePath, '')
+
     const paramRegex = /^\[(\w+)\].js$/
     if (paramRegex.test(file)) {
-        const matchingParams = file.match(paramRegex)
-        const param = matchingParams[1]
         const noExt = file.replace('.js', '')
-        const valuesInsertion = {
-            type: 'file',
-            params: [param],
-            index: file,
+        mainRouterTree[`${ignoredPath}/${noExt}`] = {
+            handler: require(`${filePath}/${file}`),
+            parser: createRouteParser(`${ignoredPath}/${noExt}`),
         }
-        pointer[noExt] = valuesInsertion
     } else if (file === 'index.js') {
-        pointer.type = 'dir'
-        pointer.index = 'index.js'
+        if (!ignoredPath) {
+            mainRouterTree[`/`] = {
+                handler: require(`${filePath}/index.js`),
+                parser: createRouteParser(`${ignoredPath}`),
+            }
+        } else {
+            mainRouterTree[`${ignoredPath}`] = {
+                handler: require(`${filePath}/index.js`),
+                parser: createRouteParser(`${ignoredPath}`),
+            }
+        }
     } else {
         const noExt = file.replace('.js', '')
-        const valuesInsertion = {
-            type: 'file',
-            index: file,
+        mainRouterTree[`${ignoredPath}/${noExt}`] = {
+            handler: require(`${filePath}/${file}`),
+            parser: createRouteParser(`${ignoredPath}/${noExt}`),
         }
-        pointer[noExt] = valuesInsertion
     }
 }
 
@@ -1390,6 +1347,7 @@ module.exports = (urlstring) => {
         queryParams = querystring.parse(_url.search.replace('?', ''))
     }
     return {
+        url: _url,
         paths: _paths,
         query: queryParams,
     }
@@ -4964,6 +4922,45 @@ module.exports = chalk;
 
 /***/ }),
 
+/***/ 854:
+/***/ (function(__unusedmodule, exports) {
+
+function createRouteParser(routeString) {
+    return isDynamicRoute(routeString)
+}
+
+function isDynamicRoute(route) {
+    let routeString = route
+    const dynRegex = /(\[\w+\])/g
+    const matchGroups = route.match(dynRegex) || []
+    matchGroups.forEach((groupItem) => {
+        routeString = routeString.replace(groupItem, '(\\w+)')
+    })
+    routeString = routeString.replace(/\//g, '\\/')
+    const parser = RegExp(`^${routeString}$`)
+    return {
+        dynamic: dynRegex.test(route),
+        parse: parser,
+        getParam: (url) => {
+            const group = url.match(parser).slice(1)
+
+            const params = {}
+
+            matchGroups.forEach((item, index) => {
+                const key = item.replace(/[\[\]]/g, '')
+                params[key] = group[index]
+            })
+
+            return params
+        },
+    }
+}
+
+exports.createRouteParser = createRouteParser
+
+
+/***/ }),
+
 /***/ 867:
 /***/ (function(module) {
 
@@ -5977,6 +5974,11 @@ setupRoutes()
     })
 
 process.on('uncaughtException', (err) => {
+    console.error(err)
+    throw err
+})
+
+process.on('unhandledRejection', (err) => {
     console.error(err)
     throw err
 })

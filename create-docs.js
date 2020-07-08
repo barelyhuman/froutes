@@ -7,6 +7,10 @@ async function main() {
         let htmlString = marked(fileMarkdownString.toString())
 
         htmlString = htmlString.replace(/\/docs\/perf.png/, 'perf.png')
+        htmlString = htmlString.replace(
+            /docs\/logo-gradient.svg/,
+            'logo-gradient.svg'
+        )
 
         const template = `
         <!DOCTYPE html>

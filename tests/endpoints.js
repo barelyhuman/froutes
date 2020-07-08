@@ -55,11 +55,11 @@ const failingCases = [
         method: 'post',
     },
     {
-        path: 'api/hello/idexist',
+        path: 'api/hello/idexist/1',
         method: 'get',
     },
     {
-        path: 'api/hello/idexist',
+        path: 'api/hello/idexist/2',
         method: 'post',
     },
 ]
