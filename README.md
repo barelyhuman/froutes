@@ -10,13 +10,14 @@ RouteX started as a clone of the Next.js' Api Routes implmentation and is now on
 
 The Idea and Inspiration for the creation remains to be Vercel's Next.js
 
-### Changes (6/Jul/2020)
+### Perks
 
--   Removed the `.route` folder for storing the compiled routes
--   You don't need to specifically use an `api` folder anymore, you can use any folder and the cli will consider it a route. Check CLI Commands below to achieve this.
--   CLI flag for custom port added to avoid using the general environment variable
+-   Custom Port and Directory
+-   Minimal so can be used with any bundler or process handler.
+-   [Performance](#Performance) focused
+-   Pre-compiled state for handling route requests
 
-### Performace
+### Performance
 
 Screenshot of `autocannon` to benchmark `/api` from the examples folder
 
@@ -25,10 +26,6 @@ Screenshot of `autocannon` to benchmark `/api` from the examples folder
 ### Warning
 
 This library is still in active development and is bound to have bugs , kindly make sure you use it only for testing and not for production as of now.
-
-### Current Limitations
-
--   A very limited cli, no hot reload, no file watcher, it literally just runs a simple processor for reading the file system as of now.
 
 ### Installation
 
