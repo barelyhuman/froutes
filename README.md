@@ -1,4 +1,4 @@
-![](docs/logo.svg | width=100)
+![](docs/logo.svg)
 
 # Routex
 
