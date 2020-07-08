@@ -8,7 +8,7 @@ async function main() {
 
         htmlString = htmlString.replace(/\/docs\/perf.png/, 'perf.png')
         htmlString = htmlString.replace(
-            /\/docs\/logo-gradient.svg/,
+            /docs\/logo-gradient.svg/,
             'logo-gradient.svg'
         )
 
