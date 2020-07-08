@@ -1,3 +1,5 @@
+![](docs/logo.svg | width=100)
+
 # Routex
 
 A minimal file tree based api router for building rest api's with node.
