@@ -854,8 +854,8 @@ const createAvailableRoutes = __webpack_require__(168)
 const ora = __webpack_require__(937)
 
 module.exports = async (directory) => {
+    const spinner = ora('Compiling...').start()
     try {
-        const spinner = ora('Compiling...').start()
         const availableRoutesTree = await createAvailableRoutes(directory)
         spinner.succeed('Compiled')
         return availableRoutesTree
