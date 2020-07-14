@@ -1,4 +1,7 @@
-<h1 align="center">Routex</h1>
+<p align="center">
+  <img width=125 src="https://raw.githubusercontent.com/barelyhuman/ftrouter/0c995656783712cd0b4314b5d4691c16fe1217b3/docs/logo.svg"/>
+</p>
+<h1 align="center">ftrouter</h1>
 <p align="center">A minimal file tree based api router for building rest api's with node</p>
 
 ### About
