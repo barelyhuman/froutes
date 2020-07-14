@@ -1,9 +1,10 @@
 {
-    "name": "routex",
+    "name": "ftrouter",
     "version": "1.0.0",
     "description": "A minimal file tree based api router for node rest api's.",
     "main": "app.js",
     "bin": {
+        "ftrouter": "dist/index.js",
         "routex": "dist/index.js"
     },
     "scripts": {
@@ -19,14 +20,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/barelyhuman/routex.git"
+        "url": "git+https://github.com/barelyhuman/ftrouter.git"
     },
     "author": "Siddharth Gelera",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/barelyhuman/routex/issues"
+        "url": "https://github.com/barelyhuman/ftrouter/issues"
     },
-    "homepage": "https://github.com/barelyhuman/routex#readme",
+    "homepage": "https://github.com/barelyhuman/ftrouter#readme",
     "dependencies": {},
     "devDependencies": {
         "@zeit/ncc": "^0.22.3",
