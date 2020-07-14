@@ -2723,6 +2723,16 @@ function processEmit (ev, arg) {
 
 /***/ }),
 
+/***/ 539:
+/***/ (function(module) {
+
+module.exports = (msg) => {
+    return console.warn('\x1b[33m Warning: ' + msg)
+}
+
+
+/***/ }),
+
 /***/ 544:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -5953,12 +5963,20 @@ module.exports.promise = (action, options) => {
 /***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
 
+const http = __webpack_require__(605)
+
 const microServer = __webpack_require__(544)
 const setupRoutes = __webpack_require__(116)
-const http = __webpack_require__(605)
+const warn = __webpack_require__(539)
 
 const argv = __webpack_require__(109)(process.argv.slice(2))
 const port = argv.p || argv.port || 3000
+
+if (process.argv[1].includes('routex')) {
+    warn(
+        'routex has been renamed/replaced by ftrouter, You can fix it by renaming your executables to ftrouter.'
+    )
+}
 
 setupRoutes()
     .then((availableRoutes) => {
