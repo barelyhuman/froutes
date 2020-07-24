@@ -554,13 +554,11 @@ function isNumber (x) {
 /***/ 116:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const basePath = __webpack_require__(973)
-const path = __webpack_require__(622)
 const processDirectories = __webpack_require__(239)
 
-module.exports = () => {
-    const processingPath = path.join(basePath())
-    return processDirectories(processingPath)
+module.exports = (config) => {
+    console.log({ config })
+    return processDirectories(config.basePath)
 }
 
 
@@ -737,18 +735,28 @@ module.exports = function (str) {
 
 /***/ }),
 
+/***/ 156:
+/***/ (function(module) {
+
+module.exports = eval("require")("./lib/warn");
+
+
+/***/ }),
+
 /***/ 168:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const fs = __webpack_require__(747).promises
 const path = __webpack_require__(622)
-const basePath = __webpack_require__(973)
 const { createRouteParser } = __webpack_require__(854)
 
 let mainRouterTree = {}
+let processingDir
 
 module.exports = async (directory) => {
     try {
+        processingDir = directory
+        console.log({ processingDir })
         await processDirectory(directory, '.')
         return mainRouterTree
     } catch (err) {
@@ -789,7 +797,7 @@ async function processDirectory(currPath, dir) {
 }
 
 function processFile(file, filePath) {
-    const _basePath = basePath()
+    const _basePath = processingDir
     const ignoredPath = filePath.replace(_basePath, '')
 
     const paramRegex = /^\[(\w+)\].js$/
@@ -5950,28 +5958,41 @@ module.exports.promise = (action, options) => {
 /***/ }),
 
 /***/ 964:
-/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
+
+const http = __webpack_require__(605)
 
 const microServer = __webpack_require__(544)
 const setupRoutes = __webpack_require__(116)
-const http = __webpack_require__(605)
+const warn = __webpack_require__(156)
+const basePath = __webpack_require__(973)
 
-const argv = __webpack_require__(109)(process.argv.slice(2))
-const port = argv.p || argv.port || 3000
+function main() {
+    const argv = __webpack_require__(109)(process.argv.slice(2))
+    const port = argv.p || argv.port || 3000
 
-setupRoutes()
-    .then((availableRoutes) => {
-        http.createServer((req, res) => {
-            microServer(req, res, availableRoutes)
-        }).listen(port, () => {
-            console.log('> Listening on ' + port)
+    if (process.argv[1].includes('routex')) {
+        warn(
+            'routex has been renamed/replaced by ftrouter, You can fix it by renaming your executables to ftrouter.'
+        )
+    }
+
+    setupRoutes({
+        basePath: basePath(),
+    })
+        .then((availableRoutes) => {
+            http.createServer((req, res) => {
+                microServer(req, res, availableRoutes)
+            }).listen(port, () => {
+                console.log('> Listening on ' + port)
+            })
         })
-    })
-    .catch((err) => {
-        console.log(err)
-        throw err
-    })
+        .catch((err) => {
+            console.log(err)
+            throw err
+        })
+}
 
 process.on('uncaughtException', (err) => {
     console.error(err)
@@ -5982,6 +6003,21 @@ process.on('unhandledRejection', (err) => {
     console.error(err)
     throw err
 })
+
+function expose() {
+    return (config) => {
+        return setupRoutes(config).then((availableRoutes) => {
+            const handler = (req, res) => microServer(req, res, availableRoutes)
+            return handler
+        })
+    }
+}
+
+if (require.main == require.cache[eval('__filename')]) {
+    main()
+} else {
+    module.exports = expose()
+}
 
 
 /***/ }),
