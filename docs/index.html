@@ -14,14 +14,14 @@
                 background: #fff;
             }
         </style>
-        <title>Routex | API's made easy</title>
+        <title>ftrouter | API's made easy</title>
     </head>
 
     <body>
         <p align="center">
-            <img width="125" src="logo-gradient.svg" />
+            <img width="125" src="docs/logo.svg" />
         </p>
-        <h1 align="center">Routex</h1>
+        <h1 align="center">ftrouter</h1>
         <p align="center">
             A minimal file tree based api router for building rest api's with
             node
@@ -29,13 +29,13 @@
 
         <h3 id="about">About</h3>
         <p>
-            RouteX started as a clone of the Next.js&#39; Api Routes
+            ftrouter started as a clone of the Next.js&#39; Api Routes
             implmentation and is now on it&#39;s path to compete with other
             frameworks as the simplest way to setup API routes. There&#39;s been
             numerous posts on why using the folder tree makes it atomic and
             easier to handle the separation between logic. While you cannot
-            bundle code with routex since each file is independent of the other
-            and doesn&#39;t need the others for its execution.
+            bundle code with ftrouter since each file is independent of the
+            other and doesn&#39;t need the others for its execution.
         </p>
         <p>
             The Idea and Inspiration for the creation remains to be Vercel&#39;s
@@ -63,18 +63,18 @@
         <h3 id="installation">Installation</h3>
         <h4 id="stable-cli">Stable Cli</h4>
         <pre><code class="language-sh"># for global install to avoid installing the devDependencies
-npm i -g barelyhuman/routex --only=prod
+npm i -g barelyhuman/ftrouter --only=prod
 # for local install to avoid installing the devDependencies
-npm i barelyhuman/routex --only=prod
+npm i barelyhuman/ftrouter --only=prod
 </code></pre>
         <h4 id="canary-cli">Canary Cli</h4>
         <pre><code class="language-sh"># for global install to avoid installing the devDependencies
-npm i -g barelyhuman/routex#canary --only=prod
+npm i -g barelyhuman/ftrouter#canary --only=prod
 # for local install to avoid installing the devDependencies
-npm i barelyhuman/routex#canary --only=prod</code></pre>
+npm i barelyhuman/ftrouter#canary --only=prod</code></pre>
         <h3 id="usage">Usage</h3>
         <p>
-            You can run <code>routex</code> in any folder and the
+            You can run <code>ftrouter</code> in any folder and the
             <code>.js</code> files will be considered as routes. The CLI
             considers the <code>api</code> folder to be the root and will pass
             down http <code>req,res</code> to the exported function.
@@ -86,9 +86,10 @@ npm i barelyhuman/routex#canary --only=prod</code></pre>
         <p>Example file tree:</p>
         <p>
             We create a folder <code>example</code> you might want to call it
-            something like <code>routes</code> and point <code>routex</code> to
-            it using <code>-d ./routes</code> to give you an http Server running
-            for the files inside of the <code>routes</code> folder.
+            something like <code>routes</code> and point
+            <code>ftrouter</code> to it using <code>-d ./routes</code> to give
+            you an http Server running for the files inside of the
+            <code>routes</code> folder.
         </p>
         <pre><code>-example
   - api
@@ -120,14 +121,14 @@ npm i barelyhuman/routex#canary --only=prod</code></pre>
 };
 </code></pre>
         <p>
-            Then run routex on the root folder of the project, this folder
+            Then run ftrouter on the root folder of the project, this folder
             should contain the <code>api</code> folder or specify a directory
             using the <code>-d</code> or <code>--dir</code> command.
         </p>
         <pre><code class="language-sh"># If installed globally
-routex -d ./example
+ftrouter -d ./example
 # If installed locally
-npx routex -d ./example
+npx ftrouter -d ./example
 </code></pre>
         <h3 id="cli-commands">CLI Commands</h3>
         <ul>
@@ -145,7 +146,7 @@ npx routex -d ./example
             the base path for the routes and start the server on port
             <code>3001</code>
         </p>
-        <pre><code class="language-sh">  routex -d ./example -p 3001
+        <pre><code class="language-sh">  ftrouter -d ./example -p 3001
 </code></pre>
     </body>
 </html>

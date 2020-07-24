@@ -735,14 +735,6 @@ module.exports = function (str) {
 
 /***/ }),
 
-/***/ 156:
-/***/ (function(module) {
-
-module.exports = eval("require")("./lib/warn");
-
-
-/***/ }),
-
 /***/ 168:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -2726,6 +2718,16 @@ function processEmit (ev, arg) {
   } else {
     return originalProcessEmit.apply(this, arguments)
   }
+}
+
+
+/***/ }),
+
+/***/ 539:
+/***/ (function(module) {
+
+module.exports = (msg) => {
+    return console.warn('\x1b[33m Warning: ' + msg)
 }
 
 
@@ -5965,7 +5967,7 @@ const http = __webpack_require__(605)
 
 const microServer = __webpack_require__(544)
 const setupRoutes = __webpack_require__(116)
-const warn = __webpack_require__(156)
+const warn = __webpack_require__(539)
 const basePath = __webpack_require__(973)
 
 function main() {

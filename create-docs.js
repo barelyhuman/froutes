@@ -28,7 +28,7 @@ async function main() {
                         background:#fff;
                     }
                 </style>
-                <title>Routex | API's made easy</title>
+                <title>ftrouter | API's made easy</title>
             </head>
         
             <body>
