@@ -557,7 +557,6 @@ function isNumber (x) {
 const processDirectories = __webpack_require__(239)
 
 module.exports = (config) => {
-    console.log({ config })
     return processDirectories(config.basePath)
 }
 
@@ -748,7 +747,6 @@ let processingDir
 module.exports = async (directory) => {
     try {
         processingDir = directory
-        console.log({ processingDir })
         await processDirectory(directory, '.')
         return mainRouterTree
     } catch (err) {
