@@ -13,7 +13,7 @@ function main() {
 
     if (process.argv[1].includes('routex')) {
         warn(
-            'routex has been renamed/replaced by ftrouter, You can fix it by renaming your executables to ftrouter.'
+            'routex has been renamed/replaced by ftrouter, Please run the server using ftrouter instead'
         )
     }
 
