@@ -13,6 +13,7 @@ The Idea and Inspiration for the creation remains to be Vercel's Next.js
 ### Canary Specifics (24,Jul 2020)
 
 -   Ability to create a custom server instance without using the cli.
+-   Added Babel as Peer deps, you can now use `.babelrc` to add transpilation and es6 `imports` `exports` directly in the routes
 
 ```js
 const app = require('ftrouter')
@@ -59,6 +60,9 @@ npm i -g barelyhuman/ftrouter --only=prod
 # for local install to avoid installing the devDependencies
 npm i barelyhuman/ftrouter --only=prod
 
+# Install if you don't already have them installed on your system
+npm i -g @babel/cli @babel/core
+
 ```
 
 #### Canary Cli
@@ -68,6 +72,9 @@ npm i barelyhuman/ftrouter --only=prod
 npm i -g barelyhuman/ftrouter#canary --only=prod
 # for local install to avoid installing the devDependencies
 npm i barelyhuman/ftrouter#canary --only=prod
+
+# Install if you don't already have them installed on your system
+npm i -g @babel/cli @babel/core
 ```
 
 ### Usage

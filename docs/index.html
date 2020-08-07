@@ -47,6 +47,11 @@
                 Ability to create a custom server instance without using the
                 cli.
             </li>
+            <li>
+                Added Babel as Peer deps, you can now use
+                <code>.babelrc</code> to add transpilation and es6
+                <code>imports</code> <code>exports</code> directly in the routes
+            </li>
         </ul>
         <pre><code class="language-js">const app = require(&#39;ftrouter&#39;)
 const http = require(&#39;http&#39;)
@@ -88,12 +93,18 @@ app({
 npm i -g barelyhuman/ftrouter --only=prod
 # for local install to avoid installing the devDependencies
 npm i barelyhuman/ftrouter --only=prod
+
+# Install if you don&#39;t already have them installed on your system
+npm i -g @babel/cli @babel/core
 </code></pre>
         <h4 id="canary-cli">Canary Cli</h4>
         <pre><code class="language-sh"># for global install to avoid installing the devDependencies
 npm i -g barelyhuman/ftrouter#canary --only=prod
 # for local install to avoid installing the devDependencies
-npm i barelyhuman/ftrouter#canary --only=prod</code></pre>
+npm i barelyhuman/ftrouter#canary --only=prod
+
+# Install if you don&#39;t already have them installed on your system
+npm i -g @babel/cli @babel/core</code></pre>
         <h3 id="usage">Usage</h3>
         <p>
             You can run <code>ftrouter</code> in any folder and the
