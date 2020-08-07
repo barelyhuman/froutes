@@ -100,6 +100,25 @@ module.exports = async (availableRoutes, req, res) => {
 
 /***/ }),
 
+/***/ 49:
+/***/ (function(module) {
+
+function webpackEmptyContext(req) {
+	if (typeof req === 'number' && __webpack_require__.m[req])
+  return __webpack_require__(req);
+try { return require(req) }
+catch (e) { if (e.code !== 'MODULE_NOT_FOUND') throw e }
+var e = new Error("Cannot find module '" + req + "'");
+	e.code = 'MODULE_NOT_FOUND';
+	throw e;
+}
+webpackEmptyContext.keys = function() { return []; };
+webpackEmptyContext.resolve = webpackEmptyContext;
+module.exports = webpackEmptyContext;
+webpackEmptyContext.id = 49;
+
+/***/ }),
+
 /***/ 58:
 /***/ (function(module) {
 
@@ -122,6 +141,42 @@ module.exports = require("os");
 const ansiRegex = __webpack_require__(436);
 
 module.exports = string => typeof string === 'string' ? string.replace(ansiRegex(), '') : string;
+
+
+/***/ }),
+
+/***/ 92:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const {dirname} = __webpack_require__(622)
+
+const findMade = (opts, parent, path = undefined) => {
+  // we never want the 'made' return value to be a root directory
+  if (path === parent)
+    return Promise.resolve()
+
+  return opts.statAsync(parent).then(
+    st => st.isDirectory() ? path : undefined, // will fail later
+    er => er.code === 'ENOENT'
+      ? findMade(opts, dirname(parent), parent)
+      : undefined
+  )
+}
+
+const findMadeSync = (opts, parent, path = undefined) => {
+  if (path === parent)
+    return undefined
+
+  try {
+    return opts.statSync(parent).isDirectory() ? path : undefined
+  } catch (er) {
+    return er.code === 'ENOENT'
+      ? findMadeSync(opts, dirname(parent), parent)
+      : undefined
+  }
+}
+
+module.exports = {findMade, findMadeSync}
 
 
 /***/ }),
@@ -555,8 +610,10 @@ function isNumber (x) {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const processDirectories = __webpack_require__(239)
+const { createCompilationDirectory } = __webpack_require__(176)
 
 module.exports = (config) => {
+    createCompilationDirectory()
     return processDirectories(config.basePath)
 }
 
@@ -715,6 +772,13 @@ MuteStream.prototype.close = proxy('close')
 
 /***/ }),
 
+/***/ 129:
+/***/ (function(module) {
+
+module.exports = require("child_process");
+
+/***/ }),
+
 /***/ 168:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -741,10 +805,10 @@ async function processDirectory(currPath, dir) {
         const pathToCheck = path.join(currPath, dir)
         const pathStat = await fs.stat(pathToCheck)
         const ignoreFiles = ['.DS_Store']
-        if (pathStat.isDirectory() && ignoreFiles.indexOf(dir) < 0) {
+        if (pathStat.isDirectory() && ignoreFiles.indexOf(dir) === -1) {
             const dirContent = await fs.readdir(pathToCheck)
             const treeMods = dirContent.map(async (fileRecord) => {
-                if (ignoreFiles.indexOf(fileRecord) < 0) {
+                if (ignoreFiles.indexOf(fileRecord) > -1) {
                     return
                 }
                 const nextPathToCheck = path.join(pathToCheck, fileRecord)
@@ -771,32 +835,81 @@ async function processDirectory(currPath, dir) {
 function processFile(file, filePath) {
     const _basePath = processingDir
     const ignoredPath = filePath.replace(_basePath, '')
-
     const paramRegex = /^\[(\w+)\].js$/
     if (paramRegex.test(file)) {
         const noExt = file.replace('.js', '')
         mainRouterTree[`${ignoredPath}/${noExt}`] = {
-            handler: require(`${filePath}/${file}`),
+            handler: requireHandler(`${filePath}/${file}`),
             parser: createRouteParser(`${ignoredPath}/${noExt}`),
         }
     } else if (file === 'index.js') {
         if (!ignoredPath) {
             mainRouterTree[`/`] = {
-                handler: require(`${filePath}/index.js`),
+                handler: requireHandler(`${filePath}/index.js`),
                 parser: createRouteParser(`${ignoredPath}`),
             }
         } else {
             mainRouterTree[`${ignoredPath}`] = {
-                handler: require(`${filePath}/index.js`),
+                handler: requireHandler(`${filePath}/index.js`),
                 parser: createRouteParser(`${ignoredPath}`),
             }
         }
     } else {
         const noExt = file.replace('.js', '')
         mainRouterTree[`${ignoredPath}/${noExt}`] = {
-            handler: require(`${filePath}/${file}`),
+            handler: requireHandler(`${filePath}/${file}`),
             parser: createRouteParser(`${ignoredPath}/${noExt}`),
         }
+    }
+}
+
+function requireHandler(path) {
+    return __webpack_require__(49)(path).default || __webpack_require__(49)(path)
+}
+
+
+/***/ }),
+
+/***/ 176:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+const fs = __webpack_require__(747)
+const path = __webpack_require__(622)
+
+const compilationDirectory = path.join(process.env.PWD, '.ftrouter')
+
+exports.compilationDirectory = compilationDirectory
+
+exports.createCompilationDirectory = async () => {
+    try {
+        const creationPath = compilationDirectory
+        const exists = await new Promise((resolve, reject) => {
+            fs.stat(creationPath, (err, stat) => {
+                if (
+                    (err && err.code === 'ENOENT') ||
+                    (err && err.code === 'ENOTDIR')
+                ) {
+                    resolve(false)
+                }
+                return resolve(true)
+            })
+        })
+
+        if (exists) {
+            return creationPath
+        } else {
+            await new Promise((resolve, reject) => {
+                fs.mkdir(creationPath, (err, done) => {
+                    if (err) reject(err)
+                    resolve(done)
+                })
+            })
+        }
+
+        return creationPath
+    } catch (err) {
+        console.error(err)
+        throw err
     }
 }
 
@@ -830,13 +943,19 @@ module.exports = require("querystring");
 /***/ 239:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const createAvailableRoutes = __webpack_require__(168)
 const ora = __webpack_require__(937)
+const path = __webpack_require__(622)
+
+const createAvailableRoutes = __webpack_require__(168)
+const compileSourceFiles = __webpack_require__(395)
+const { compilationDirectory } = __webpack_require__(176)
 
 module.exports = async (directory) => {
     const spinner = ora('Compiling...').start()
     try {
-        const availableRoutesTree = await createAvailableRoutes(directory)
+        await compileSourceFiles(directory)
+        const routesDirectory = path.join(compilationDirectory, 'routes')
+        const availableRoutesTree = await createAvailableRoutes(routesDirectory)
         spinner.succeed('Compiled')
         return availableRoutesTree
     } catch (err) {
@@ -1176,6 +1295,23 @@ module.exports = (urlstring) => {
 
 /***/ }),
 
+/***/ 336:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const fs = __webpack_require__(747)
+
+const version = process.env.__TESTING_MKDIRP_NODE_VERSION__ || process.version
+const versArr = version.replace(/^v/, '').split('.')
+const hasNative = +versArr[0] > 10 || +versArr[0] === 10 && +versArr[1] >= 12
+
+const useNative = !hasNative ? () => false : opts => opts.mkdir === fs.mkdir
+const useNativeSync = !hasNative ? () => false : opts => opts.mkdirSync === fs.mkdirSync
+
+module.exports = {useNative, useNativeSync}
+
+
+/***/ }),
+
 /***/ 357:
 /***/ (function(module) {
 
@@ -1195,6 +1331,43 @@ module.exports = (flag, argv = process.argv) => {
 	const terminatorPosition = argv.indexOf('--');
 	return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
 };
+
+
+/***/ }),
+
+/***/ 395:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const mkdirp = __webpack_require__(626)
+const path = __webpack_require__(622)
+const { exec } = __webpack_require__(129)
+
+const { compilationDirectory } = __webpack_require__(176)
+
+module.exports = async (directory) => {
+    try {
+        const routesDir = path.join(compilationDirectory, 'routes')
+        mkdirp(routesDir)
+
+        return new Promise((resolve, reject) => {
+            const babel = exec(
+                `npx babel ${directory} --out-dir ${routesDir}`,
+                function (error, stdout, stderr) {
+                    if (error) {
+                        console.error(error.stack)
+                        console.error('Error code: ' + error.code)
+                        console.error('Signal received: ' + error.signal)
+                        reject()
+                    }
+                    resolve()
+                }
+            )
+        })
+    } catch (err) {
+        console.log(err)
+        throw err
+    }
+}
 
 
 /***/ }),
@@ -1465,6 +1638,82 @@ module.exports = async (req, res, availableRoutes) => {
         throw err
     }
 }
+
+
+/***/ }),
+
+/***/ 561:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const {dirname} = __webpack_require__(622)
+const {findMade, findMadeSync} = __webpack_require__(92)
+const {mkdirpManual, mkdirpManualSync} = __webpack_require__(806)
+
+const mkdirpNative = (path, opts) => {
+  opts.recursive = true
+  const parent = dirname(path)
+  if (parent === path)
+    return opts.mkdirAsync(path, opts)
+
+  return findMade(opts, path).then(made =>
+    opts.mkdirAsync(path, opts).then(() => made)
+    .catch(er => {
+      if (er.code === 'ENOENT')
+        return mkdirpManual(path, opts)
+      else
+        throw er
+    }))
+}
+
+const mkdirpNativeSync = (path, opts) => {
+  opts.recursive = true
+  const parent = dirname(path)
+  if (parent === path)
+    return opts.mkdirSync(path, opts)
+
+  const made = findMadeSync(opts, path)
+  try {
+    opts.mkdirSync(path, opts)
+    return made
+  } catch (er) {
+    if (er.code === 'ENOENT')
+      return mkdirpManualSync(path, opts)
+    else
+      throw er
+  }
+}
+
+module.exports = {mkdirpNative, mkdirpNativeSync}
+
+
+/***/ }),
+
+/***/ 582:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const { promisify } = __webpack_require__(669)
+const fs = __webpack_require__(747)
+const optsArg = opts => {
+  if (!opts)
+    opts = { mode: 0o777, fs }
+  else if (typeof opts === 'object')
+    opts = { mode: 0o777, fs, ...opts }
+  else if (typeof opts === 'number')
+    opts = { mode: opts, fs }
+  else if (typeof opts === 'string')
+    opts = { mode: parseInt(opts, 8), fs }
+  else
+    throw new TypeError('invalid options argument')
+
+  opts.mkdir = opts.mkdir || opts.fs.mkdir || fs.mkdir
+  opts.mkdirAsync = promisify(opts.mkdir)
+  opts.stat = opts.stat || opts.fs.stat || fs.stat
+  opts.statAsync = promisify(opts.stat)
+  opts.statSync = opts.statSync || opts.fs.statSync || fs.statSync
+  opts.mkdirSync = opts.mkdirSync || opts.fs.mkdirSync || fs.mkdirSync
+  return opts
+}
+module.exports = optsArg
 
 
 /***/ }),
@@ -2611,6 +2860,44 @@ module.exports = require("path");
 
 /***/ }),
 
+/***/ 626:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const optsArg = __webpack_require__(582)
+const pathArg = __webpack_require__(870)
+
+const {mkdirpNative, mkdirpNativeSync} = __webpack_require__(561)
+const {mkdirpManual, mkdirpManualSync} = __webpack_require__(806)
+const {useNative, useNativeSync} = __webpack_require__(336)
+
+
+const mkdirp = (path, opts) => {
+  path = pathArg(path)
+  opts = optsArg(opts)
+  return useNative(opts)
+    ? mkdirpNative(path, opts)
+    : mkdirpManual(path, opts)
+}
+
+const mkdirpSync = (path, opts) => {
+  path = pathArg(path)
+  opts = optsArg(opts)
+  return useNativeSync(opts)
+    ? mkdirpNativeSync(path, opts)
+    : mkdirpManualSync(path, opts)
+}
+
+mkdirp.sync = mkdirpSync
+mkdirp.native = (path, opts) => mkdirpNative(pathArg(path), optsArg(opts))
+mkdirp.manual = (path, opts) => mkdirpManual(pathArg(path), optsArg(opts))
+mkdirp.nativeSync = (path, opts) => mkdirpNativeSync(pathArg(path), optsArg(opts))
+mkdirp.manualSync = (path, opts) => mkdirpManualSync(pathArg(path), optsArg(opts))
+
+module.exports = mkdirp
+
+
+/***/ }),
+
 /***/ 634:
 /***/ (function(module) {
 
@@ -2907,6 +3194,13 @@ module.exports = {"dots":{"interval":80,"frames":["⠋","⠙","⠹","⠸","⠼",
 
 /***/ }),
 
+/***/ 669:
+/***/ (function(module) {
+
+module.exports = require("util");
+
+/***/ }),
+
 /***/ 723:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -3049,6 +3343,77 @@ module.exports = {
 	stringReplaceAll,
 	stringEncaseCRLFWithFirstIndex
 };
+
+
+/***/ }),
+
+/***/ 806:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const {dirname} = __webpack_require__(622)
+
+const mkdirpManual = (path, opts, made) => {
+  opts.recursive = false
+  const parent = dirname(path)
+  if (parent === path) {
+    return opts.mkdirAsync(path, opts).catch(er => {
+      // swallowed by recursive implementation on posix systems
+      // any other error is a failure
+      if (er.code !== 'EISDIR')
+        throw er
+    })
+  }
+
+  return opts.mkdirAsync(path, opts).then(() => made || path, er => {
+    if (er.code === 'ENOENT')
+      return mkdirpManual(parent, opts)
+        .then(made => mkdirpManual(path, opts, made))
+    if (er.code !== 'EEXIST' && er.code !== 'EROFS')
+      throw er
+    return opts.statAsync(path).then(st => {
+      if (st.isDirectory())
+        return made
+      else
+        throw er
+    }, () => { throw er })
+  })
+}
+
+const mkdirpManualSync = (path, opts, made) => {
+  const parent = dirname(path)
+  opts.recursive = false
+
+  if (parent === path) {
+    try {
+      return opts.mkdirSync(path, opts)
+    } catch (er) {
+      // swallowed by recursive implementation on posix systems
+      // any other error is a failure
+      if (er.code !== 'EISDIR')
+        throw er
+      else
+        return
+    }
+  }
+
+  try {
+    opts.mkdirSync(path, opts)
+    return made || path
+  } catch (er) {
+    if (er.code === 'ENOENT')
+      return mkdirpManualSync(path, opts, mkdirpManualSync(parent, opts, made))
+    if (er.code !== 'EEXIST' && er.code !== 'EROFS')
+      throw er
+    try {
+      if (!opts.statSync(path).isDirectory())
+        throw er
+    } catch (_) {
+      throw er
+    }
+  }
+}
+
+module.exports = {mkdirpManual, mkdirpManualSync}
 
 
 /***/ }),
@@ -3447,6 +3812,42 @@ exports.createRouteParser = createRouteParser
 /***/ (function(module) {
 
 module.exports = require("tty");
+
+/***/ }),
+
+/***/ 870:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const platform = process.env.__TESTING_MKDIRP_PLATFORM__ || process.platform
+const { resolve, parse } = __webpack_require__(622)
+const pathArg = path => {
+  if (/\0/.test(path)) {
+    // simulate same failure that node raises
+    throw Object.assign(
+      new TypeError('path must be a string without null bytes'),
+      {
+        path,
+        code: 'ERR_INVALID_ARG_VALUE',
+      }
+    )
+  }
+
+  path = resolve(path)
+  if (platform === 'win32') {
+    const badWinChars = /[*|"<>?:]/
+    const {root} = parse(path)
+    if (badWinChars.test(path.substr(root.length))) {
+      throw Object.assign(new Error('Illegal characters in path.'), {
+        path,
+        code: 'EINVAL',
+      })
+    }
+  }
+
+  return path
+}
+module.exports = pathArg
+
 
 /***/ }),
 

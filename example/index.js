@@ -1,3 +1,3 @@
-module.exports = (req, res) => {
-    return res.send({ index: 'up' })
+export default (req, { send }) => {
+    return send({ index: 'down' })
 }
