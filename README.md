@@ -39,15 +39,6 @@ npm i barelyhuman/ftrouter --only=prod
 
 ```
 
-#### Canary Cli
-
-```sh
-# for global install to avoid installing the devDependencies
-npm i -g barelyhuman/ftrouter#canary --only=prod
-# for local install to avoid installing the devDependencies
-npm i barelyhuman/ftrouter#canary --only=prod
-```
-
 ### Usage
 
 You can run `ftrouter` in any folder and the `.js` files will be considered as routes.
