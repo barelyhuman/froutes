@@ -10,28 +10,6 @@ ftrouter started as a clone of the Next.js' Api Routes implmentation and is now 
 
 The Idea and Inspiration for the creation remains to be Vercel's Next.js
 
-### Canary Specifics (24,Jul 2020)
-
--   Ability to create a custom server instance without using the cli.
-
-```js
-const app = require('ftrouter')
-const http = require('http')
-const path = require('path')
-
-const PORT = process.env.PORT || 3000
-
-app({
-    basePath: path.join(process.cwd(), 'example'),
-}).then((appHandler) => {
-    http.createServer((req, res) => {
-        appHandler(req, res)
-    }).listen(PORT, () => {
-        console.log('Listening on, ' + PORT)
-    })
-})
-```
-
 ### Perks
 
 -   Custom Port and Directory
@@ -130,4 +108,26 @@ Example, the following would use the `example` folder as the base path for the r
 ```sh
   ftrouter -d ./example -p 3001
 
+```
+
+### Custom Server
+
+You can create a custom server to handle req,res manually by using the following example
+
+```js
+const app = require('ftrouter')
+const http = require('http')
+const path = require('path')
+
+const PORT = process.env.PORT || 3000
+
+app({
+    basePath: path.join(process.cwd(), 'example'),
+}).then((appHandler) => {
+    http.createServer((req, res) => {
+        appHandler(req, res)
+    }).listen(PORT, () => {
+        console.log('Listening on, ' + PORT)
+    })
+})
 ```
