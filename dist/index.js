@@ -3439,7 +3439,7 @@ function isDynamicRoute(route) {
     const dynRegex = /(\[\w+\])/g
     const matchGroups = route.match(dynRegex) || []
     matchGroups.forEach((groupItem) => {
-        routeString = routeString.replace(groupItem, '(\\w+[-]*\\w+)')
+        routeString = routeString.replace(groupItem, '((\\w+[-]*)+)')
     })
     routeString = routeString.replace(/\//g, '\\/')
     const parser = RegExp(`^${routeString}$`)
