@@ -41,6 +41,28 @@
             The Idea and Inspiration for the creation remains to be Vercel&#39;s
             Next.js
         </p>
+        <h3 id="canary-specifics-24jul-2020">Canary Specifics (24,Jul 2020)</h3>
+        <ul>
+            <li>
+                Ability to create a custom server instance without using the
+                cli.
+            </li>
+        </ul>
+        <pre><code class="language-js">const app = require(&#39;ftrouter&#39;)
+const http = require(&#39;http&#39;)
+const path = require(&#39;path&#39;)
+
+const PORT = process.env.PORT || 3000
+
+app({
+    basePath: path.join(process.cwd(), &#39;example&#39;),
+}).then((appHandler) =&gt; {
+    http.createServer((req, res) =&gt; {
+        appHandler(req, res)
+    }).listen(PORT, () =&gt; {
+        console.log(&#39;Listening on, &#39; + PORT)
+    })
+})</code></pre>
         <h3 id="perks">Perks</h3>
         <ul>
             <li>Custom Port and Directory</li>
