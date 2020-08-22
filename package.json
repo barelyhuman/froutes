@@ -1,6 +1,6 @@
 {
   "name": "ftrouter",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A minimal file tree based api router for node rest api's.",
   "main": "dist/index.js",
   "bin": {
