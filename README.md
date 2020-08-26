@@ -3,6 +3,7 @@
 </p>
 <h1 align="center">ftrouter</h1>
 <p align="center">A minimal file tree based api router for building rest api's with node</p>
+<p align="center">That's as easy as I could make it</p>
 
 ### About
 
