@@ -4117,7 +4117,7 @@ let _basePath
 module.exports = () => {
     if (!_basePath) {
         const dir = argv.d || argv.dir || 'api'
-        _basePath = path.join(process.cwd(), dir)
+        _basePath = path.join(__dirname, dir)
     }
     return _basePath
 }
