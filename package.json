@@ -31,7 +31,7 @@
   "dependencies": {},
   "devDependencies": {
     "@zeit/ncc": "^0.22.3",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "husky": ">=4",
     "lint-staged": ">=10",
     "marked": "^1.1.0",
