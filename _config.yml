@@ -1,8 +1,8 @@
 title: Routex
 description: A minimal file tree based api router for node rest api's.
-google_analytics: 
+google_analytics:
 show_downloads: true
 theme: jekyll-theme-cayman
 
 gems:
-  - jekyll-mentions
+    - jekyll-mentions
