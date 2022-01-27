@@ -27,7 +27,7 @@
 	"scripts": {
 		"build": "esbuild main.js --bundle --outfile=dist/index.js --platform=node --target=node12",
 		"build:prod": "npm run build -- --minify",
-		"fix": "xo --fix"
+		"fix": "xo --fix --ignore routes"
 	},
 	"xo": {
 		"prettier": true
