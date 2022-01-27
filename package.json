@@ -1,27 +1,54 @@
 {
-  "name": "froutes",
-  "description": "file tree based rest api routes for node",
-  "version": "0.0.0",
-  "repository": "git@github.com:barelyhuman/froutes.git",
-  "author": "Reaper <ahoy@barelyhuman.dev>",
-  "license": "MIT",
-  "main": "dist/index.js",
-  "module": "main.js",
-  "files": [
-    "main.js",
-    "dist"
-  ],
-  "exports": {
-    ".": {
-      "import": "./main.js",
-      "require": "./dist/index.js"
-    },
-    "./package.json": "./package.json"
-  },
-  "scripts": {
-    "build": "esbuild main.js --minify --bundle --outfile=dist/index.js --platform=node --target=node12"
-  },
-  "devDependencies": {
-    "esbuild": "^0.14.14"
-  }
+	"name": "froutes",
+	"version": "0.0.0",
+	"description": "file tree based rest api routes for node",
+	"repository": "git@github.com:barelyhuman/froutes.git",
+	"license": "MIT",
+	"author": "Reaper <ahoy@barelyhuman.dev>",
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./main.js",
+			"require": "./dist/index.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"bin": {
+		"froutes": "./cli.js"
+	},
+	"main": "dist/index.js",
+	"module": "main.js",
+	"files": [
+		"lib",
+		"cli.js",
+		"main.js",
+		"dist"
+	],
+	"scripts": {
+		"build": "esbuild main.js --bundle --outfile=dist/index.js --platform=node --target=node12",
+		"build:prod": "npm run build -- --minify",
+		"fix": "xo --fix"
+	},
+	"xo": {
+		"prettier": true
+	},
+	"prettier": {
+		"bracketSpacing": false,
+		"semi": false,
+		"singleQuote": true,
+		"trailingComma": "es5",
+		"useTabs": true
+	},
+	"devDependencies": {
+		"@arkweid/lefthook": "0.7.7",
+		"esbuild": "0.14.14",
+		"prettier": "2.5.1",
+		"xo": "0.47.0"
+	},
+	"engines": {
+		"node": ">=12"
+	},
+	"dependencies": {
+		"kleur": "4.1.4"
+	}
 }

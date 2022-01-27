@@ -1,0 +1,5 @@
+pre-commit:
+  commands:
+    lint:
+      glob: '*.{js,ts,jsx,tsx}'
+      run: yarn fix {staged_files}
