@@ -1,12 +1,12 @@
 lockfileVersion: 5.3
 
 specifiers:
-  '@arkweid/lefthook': ^0.7.7
-  esbuild: ^0.14.14
-  kleur: ^4.1.4
-  prettier: ^2.5.1
+  '@arkweid/lefthook': 0.7.7
+  esbuild: 0.14.14
+  kleur: 4.1.4
+  prettier: 2.5.1
   regexparam: ^2.0.0
-  xo: ^0.47.0
+  xo: 0.47.0
 
 dependencies:
   kleur: 4.1.4

@@ -7,18 +7,43 @@ import {existsSync} from 'node:fs'
 import {readdir} from 'node:fs/promises'
 import {resolve, join} from 'node:path'
 import http from 'node:http'
+import {parse} from 'regexparam'
 import {log} from './lib/log.js'
 
 const manifest = {}
 
 const handleRoutes = async (manifest, request, response) => {
 	const urlPath = request.url
+
 	const _path = urlPath.replace(/\/$/, '') + '/index.js'
-	if (manifest[_path]) {
-		return manifest[_path].handler(request, response)
+
+	let handler = () => response.end()
+
+	for (const item of Object.values(manifest)) {
+		if (!(item && item.pattern)) {
+			continue
+		}
+
+		if (!item.pattern.test(_path)) {
+			continue
+		}
+
+		if (item.keys.length > 0) {
+			const parameters = {}
+			const matches = item.pattern.exec(_path)
+
+			for (let i = 0; i < item.keys.length; i++) {
+				parameters[item.keys[i]] = matches[i + 1]
+			}
+
+			request.params = parameters
+		}
+
+		handler = item.handler
+		break
 	}
 
-	return response.end()
+	return handler(request, response)
 }
 
 const generateManifest = async () => {
@@ -42,9 +67,15 @@ const generateManifest = async () => {
 					)
 				}
 
-				const cleanedPath = filePath.replace(routesPath, '')
+				const cleanedPath = filePath
+					.replace(routesPath, '')
+					.replace(/\[(\w+)]/g, ':$1')
+
+				const {keys, pattern} = parse(cleanedPath, true)
 
 				manifest[cleanedPath] = {
+					keys,
+					pattern,
 					handler: mod.default,
 				}
 			})

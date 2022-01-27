@@ -49,6 +49,7 @@
 		"node": ">=12"
 	},
 	"dependencies": {
-		"kleur": "4.1.4"
+		"kleur": "4.1.4",
+		"regexparam": "^2.0.0"
 	}
 }
