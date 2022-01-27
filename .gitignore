@@ -1,4 +1,4 @@
-/node_modules
-**/*/.route
+dist
+node_modules
 .DS_Store
-tmp
+routes
