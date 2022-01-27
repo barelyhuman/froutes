@@ -1,46 +1,47 @@
 #!/usr/bin/env node
+const process = require('process')
+const microServer = require('./lib/micro-server.js')
+const setupRoutes = require('./lib/setup-routes.js')
+const warn = require('./lib/warn.js')
 
-const microServer = require('./lib/micro-server')
-const setupRoutes = require('./lib/setup-routes')
-const warn = require('./lib/warn')
-
-const initProject = require('./lib/init-project')
-const { serve } = require('./lib/serve')
+const initProject = require('./lib/init-project.js')
+const {serve} = require('./lib/serve.js')
 
 function main() {
-    const argv = require('minimist')(process.argv.slice(2))
-    if (process.argv[1].includes('routex')) {
-        warn(
-            'routex has been renamed/replaced by ftrouter, You can fix it by renaming your executables to ftrouter.'
-        )
-    }
+	const argv = require('minimist')(process.argv.slice(2))
+	if (process.argv[1].includes('routex')) {
+		warn(
+			'routex has been renamed/replaced by ftrouter, You can fix it by renaming your executables to ftrouter.'
+		)
+	}
 
-    if (argv.init) {
-        return initProject()
-    }
+	if (argv.init) {
+		return initProject()
+	}
 
-    return serve()
+	return serve()
 }
 
-process.on('uncaughtException', (err) => {
-    throw err
+process.on('uncaughtException', (error) => {
+	throw error
 })
 
-process.on('unhandledRejection', (err) => {
-    throw err
+process.on('unhandledRejection', (error) => {
+	throw error
 })
 
 function expose() {
-    return (config) => {
-        return setupRoutes(config).then((availableRoutes) => {
-            const handler = (req, res) => microServer(req, res, availableRoutes)
-            return handler
-        })
-    }
+	return (config) => {
+		return setupRoutes(config).then((availableRoutes) => {
+			const handler = (request, response) =>
+				microServer(request, response, availableRoutes)
+			return handler
+		})
+	}
 }
 
-if (require.main == module) {
-    main()
+if (require.main === module) {
+	main()
 } else {
-    module.exports = expose()
+	module.exports = expose()
 }
